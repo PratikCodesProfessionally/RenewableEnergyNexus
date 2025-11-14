@@ -107,10 +107,47 @@ function setupConsultation() {
     `;
     document.body.appendChild(modal);
 
+    // Cloud Agent Chat Modal
+    const cloudAgentModal = document.createElement('div');
+    cloudAgentModal.className = 'cloud-agent-modal';
+    cloudAgentModal.innerHTML = `
+        <div class="cloud-agent-content">
+            <span class="close-cloud-agent">&times;</span>
+            <div class="cloud-agent-header">
+                <i class="fas fa-robot"></i>
+                <h3>AI Cloud Agent - Renewable Energy Consultant</h3>
+                <p class="language-selector">
+                    <button class="lang-btn active" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="de">Deutsch</button>
+                </p>
+            </div>
+            <div class="cloud-agent-chat">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="agent-message">
+                        <i class="fas fa-robot"></i>
+                        <p>Hello! I'm your AI Cloud Agent for renewable energy consultation. How can I help you today?</p>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="Type your question here..." />
+                    <button id="send-chat" class="send-btn">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(cloudAgentModal);
+
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-            document.getElementById('consult-type').value = btn.dataset.type;
-            modal.style.display = 'block';
+            if (btn.dataset.type === 'cloud-agent') {
+                cloudAgentModal.style.display = 'flex';
+                document.getElementById('chat-input').focus();
+            } else {
+                document.getElementById('consult-type').value = btn.dataset.type;
+                modal.style.display = 'block';
+            }
         });
     });
 
@@ -118,10 +155,115 @@ function setupConsultation() {
         modal.style.display = 'none';
     });
 
+    cloudAgentModal.querySelector('.close-cloud-agent').addEventListener('click', () => {
+        cloudAgentModal.style.display = 'none';
+    });
+
     document.getElementById('consult-form').addEventListener('submit', (e) => {
         e.preventDefault();
         alert('Consultation request submitted! We will contact you soon.');
         modal.style.display = 'none';
+    });
+
+    setupCloudAgentChat();
+}
+
+// Cloud Agent Chat Functionality
+function setupCloudAgentChat() {
+    let currentLanguage = 'en';
+    
+    const messages = {
+        en: {
+            greeting: "Hello! I'm your AI Cloud Agent for renewable energy consultation. How can I help you today?",
+            solar: "Solar energy is a great choice! Based on German market prices, a typical residential solar PV system costs €1,200-€1,800 per kW. Would you like me to calculate potential savings for your specific case?",
+            wind: "Wind energy can be very effective, especially in certain locations. For residential applications, small wind turbines are available. Would you like information about feasibility assessments?",
+            storage: "Battery storage systems are crucial for maximizing renewable energy use. Modern lithium-ion systems typically cost €800-€1,200 per kWh of capacity. What's your energy storage requirement?",
+            hybrid: "A hybrid system combining solar and wind with battery storage offers the best reliability. I can help you design an optimal system. What's your daily energy consumption?",
+            default: "That's an interesting question! For detailed technical consultation, I recommend contacting our human experts. Would you like me to schedule a consultation?"
+        },
+        de: {
+            greeting: "Hallo! Ich bin Ihr KI-Cloud-Agent für Beratung zu erneuerbaren Energien. Wie kann ich Ihnen heute helfen?",
+            solar: "Solarenergie ist eine großartige Wahl! Basierend auf deutschen Marktpreisen kostet eine typische Photovoltaikanlage für Wohngebäude €1.200-€1.800 pro kW. Möchten Sie, dass ich mögliche Einsparungen für Ihren speziellen Fall berechne?",
+            wind: "Windenergie kann sehr effektiv sein, besonders an bestimmten Standorten. Für Wohnanwendungen sind kleine Windturbinen verfügbar. Möchten Sie Informationen über Machbarkeitsstudien?",
+            storage: "Batteriespeichersysteme sind entscheidend für die Maximierung der Nutzung erneuerbarer Energien. Moderne Lithium-Ionen-Systeme kosten typischerweise €800-€1.200 pro kWh Kapazität. Was ist Ihr Energiespeicherbedarf?",
+            hybrid: "Ein Hybridsystem, das Solar und Wind mit Batteriespeicher kombiniert, bietet die beste Zuverlässigkeit. Ich kann Ihnen helfen, ein optimales System zu entwerfen. Was ist Ihr täglicher Energieverbrauch?",
+            default: "Das ist eine interessante Frage! Für detaillierte technische Beratung empfehle ich den Kontakt zu unseren menschlichen Experten. Möchten Sie, dass ich eine Beratung vereinbare?"
+        }
+    };
+
+    // Language switching
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentLanguage = this.dataset.lang;
+            
+            // Update greeting message
+            const chatMessages = document.getElementById('chat-messages');
+            const firstMessage = chatMessages.querySelector('.agent-message p');
+            if (firstMessage) {
+                firstMessage.textContent = messages[currentLanguage].greeting;
+            }
+        });
+    });
+
+    // Send message
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        
+        if (!message) return;
+
+        const chatMessages = document.getElementById('chat-messages');
+        
+        // Add user message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'user-message';
+        userMsg.innerHTML = `
+            <p>${message}</p>
+            <i class="fas fa-user"></i>
+        `;
+        chatMessages.appendChild(userMsg);
+        
+        input.value = '';
+        
+        // Simulate agent response
+        setTimeout(() => {
+            const agentMsg = document.createElement('div');
+            agentMsg.className = 'agent-message';
+            
+            let response = messages[currentLanguage].default;
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('solar') || lowerMessage.includes('photovoltaic') || lowerMessage.includes('pv')) {
+                response = messages[currentLanguage].solar;
+            } else if (lowerMessage.includes('wind')) {
+                response = messages[currentLanguage].wind;
+            } else if (lowerMessage.includes('battery') || lowerMessage.includes('storage') || lowerMessage.includes('speicher')) {
+                response = messages[currentLanguage].storage;
+            } else if (lowerMessage.includes('hybrid')) {
+                response = messages[currentLanguage].hybrid;
+            }
+            
+            agentMsg.innerHTML = `
+                <i class="fas fa-robot"></i>
+                <p>${response}</p>
+            `;
+            chatMessages.appendChild(agentMsg);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 500);
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    document.getElementById('send-chat').addEventListener('click', sendMessage);
+    document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
     });
 }
 
