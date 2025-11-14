@@ -13,7 +13,7 @@ class EmailSubscriptionManager {
     constructor() {
         this.apiKey = 'YOUR_BREVO_API_KEY'; // Replace with your actual API key
         this.apiEndpoint = 'https://api.brevo.com/v3';
-        this.listId = 2; // Replace with your Brevo list ID
+        this.listId = 2;
         this.subscribers = this.loadSubscribers();
     }
 
