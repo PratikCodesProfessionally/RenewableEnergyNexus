@@ -227,15 +227,13 @@ nav {
     padding: 0 1.5rem;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.5s ease, display 0.2s step-end;
-    display: none;
+    transition: max-height 0.6s ease, padding 0.6s ease;
 }
 
 .energy-card.active .energy-content {
-    max-height: 500px;
-    padding: 0 1.5rem 1.5rem;
-    transition: max-height 0.5s ease, display 0.2s step-start;
-    display: block;
+    max-height: none;
+    padding: 1.5rem;
+    overflow: visible;
 }
 
 .energy-card h3 {
@@ -265,6 +263,66 @@ nav {
     .hydrogen-comparison th {
         background: rgba(0,0,0,0.2);
     }
+
+/* Project Showcase Styles */
+.project-showcase {
+    margin: 1.5rem 0;
+}
+
+.project-item {
+    background: rgba(0,0,0,0.3);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+    transition: all 0.3s ease;
+}
+
+    .project-item:hover {
+        background: rgba(0,0,0,0.4);
+        transform: translateX(5px);
+    }
+
+    .project-item h5 {
+        color: var(--accent);
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .project-item p {
+        margin: 0.5rem 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+        .project-item p strong {
+            color: rgba(255,255,255,0.9);
+            display: inline-block;
+            min-width: 120px;
+        }
+
+.energy-content h4 {
+    color: var(--accent);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+    border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+.energy-content ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+    line-height: 1.8;
+}
+
+    .energy-content ul li {
+        margin-bottom: 0.5rem;
+    }
+
+        .energy-content ul li ul {
+            margin-top: 0.5rem;
+        }
 
 /* Interactive Map */
 #projects-map {
