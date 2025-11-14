@@ -39,41 +39,50 @@ function initMap() {
     });
 }
 
+// Toggle function for energy cards (called from onclick in HTML)
+function toggleCard(card) {
+    // Close other cards
+    document.querySelectorAll('.energy-card').forEach(c => {
+        if (c !== card) c.classList.remove('active');
+    });
+    
+    // Toggle this card
+    card.classList.toggle('active');
+    
+    // Update calculator energy type
+    const energyType = card.dataset.energyType;
+    if (energyType) {
+        const energyTypeSelect = document.getElementById('energy-type');
+        if (energyTypeSelect) {
+            energyTypeSelect.value = energyType;
+        }
+    }
+    
+    // Handle map initialization
+    if (card.classList.contains('active')) {
+        setTimeout(() => {
+            if (card.querySelector('#projects-map')) {
+                if (!map) {
+                    initMap();
+                } else {
+                    map.invalidateSize();
+                }
+            }
+        }, 300);
+    }
+    
+    // Recalculate if needed
+    const energyUseInput = document.getElementById('energy-use');
+    if (energyUseInput && energyUseInput.value) {
+        calculateSavingsDE();
+    }
+}
+
 // Energy Card Interactions
 function setupEnergyCards() {
     document.querySelectorAll('.energy-card').forEach(card => {
         card.addEventListener('click', function() {
-            // Close other cards
-            document.querySelectorAll('.energy-card').forEach(c => {
-                if (c !== this) c.classList.remove('active');
-            });
-            
-            // Toggle this card
-            this.classList.toggle('active');
-            
-            // Update calculator energy type
-            const energyType = this.dataset.energyType;
-            if (energyType) {
-                document.getElementById('energy-type').value = energyType;
-            }
-            
-            // Handle map initialization
-            if (this.classList.contains('active')) {
-                setTimeout(() => {
-                    if (this.querySelector('#projects-map')) {
-                        if (!map) {
-                            initMap();
-                        } else {
-                            map.invalidateSize();
-                        }
-                    }
-                }, 300);
-            }
-            
-            // Recalculate if needed
-            if (document.getElementById('energy-use').value) {
-                calculateSavings();
-            }
+            toggleCard(this);
         });
     });
 }
