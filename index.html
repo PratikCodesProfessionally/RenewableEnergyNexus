@@ -119,7 +119,7 @@
                 <p>Learn about the different types of clean energy sources that are powering our future</p>
 
                 <div class="energy-types">
-                    <div class="energy-card" onclick="toggleCard(this)">
+                    <div class="energy-card" id="solar-energy" onclick="toggleCard(this)">
                         <div class="energy-header">
                             <div class="energy-icon">
                                 <i class="fas fa-solar-panel"></i>
@@ -127,17 +127,80 @@
                             <h3>Solar Energy</h3>
                         </div>
                         <div class="energy-content">
-                            <p>Solar power harnesses energy from sunlight using photovoltaic cells. It's the most abundant energy source on Earth, with the potential to meet global energy demands many times over.</p>
+                            <h4>Technical Overview</h4>
+                            <p>Solar photovoltaic (PV) technology converts sunlight directly into electricity through the photovoltaic effect. When photons strike semiconductor materials (typically silicon), they excite electrons, creating an electrical current. This process occurs in solar cells, which are connected to form modules (panels), and multiple modules create arrays capable of generating utility-scale power.</p>
+                            
+                            <p><strong>Key Technologies:</strong></p>
                             <ul>
-                                <li><strong>Pros:</strong> Unlimited supply, low operating costs, scalable from small to large installations</li>
-                                <li><strong>Cons:</strong> Intermittent production, requires energy storage solutions</li>
-                                <li><strong>Efficiency:</strong> Modern panels achieve 15-22% efficiency</li>
+                                <li><strong>Monocrystalline Silicon:</strong> 20-22% efficiency, premium performance, black aesthetic</li>
+                                <li><strong>Polycrystalline Silicon:</strong> 15-17% efficiency, cost-effective for large installations</li>
+                                <li><strong>Thin-Film (CdTe, CIGS):</strong> 12-14% efficiency, flexible applications, lower material costs</li>
+                                <li><strong>Bifacial Panels:</strong> Capture reflected light from both sides, 10-20% additional yield</li>
+                                <li><strong>Concentrated Solar Power (CSP):</strong> Uses mirrors to concentrate sunlight, includes thermal storage</li>
                             </ul>
-                            <a href="#" class="read-more">Explore Solar Solutions →</a>
+
+                            <h4>Current Industry Trends</h4>
+                            <ul>
+                                <li><strong>Perovskite Tandem Cells:</strong> Laboratory efficiencies exceeding 33%, commercial deployment expected 2026-2027</li>
+                                <li><strong>Bifacial Technology Adoption:</strong> Now represents 40% of global module production</li>
+                                <li><strong>Building-Integrated PV (BIPV):</strong> Solar roof tiles, facades, and transparent windows for urban applications</li>
+                                <li><strong>Agrivoltaics:</strong> Combining agriculture with solar panels, optimizing land use while maintaining crop yields</li>
+                                <li><strong>AI-Powered Optimization:</strong> Machine learning for predictive maintenance and energy yield forecasting</li>
+                                <li><strong>Recycling Infrastructure:</strong> Emerging circular economy for panel end-of-life management (25-30 year lifespan)</li>
+                            </ul>
+
+                            <h4>Notable Global Projects</h4>
+                            
+                            <div class="project-showcase">
+                                <div class="project-item">
+                                    <h5>🌞 Bhadla Solar Park, India</h5>
+                                    <p><strong>Location:</strong> Rajasthan, India</p>
+                                    <p><strong>Capacity:</strong> 2,245 MW (world's largest operational solar park)</p>
+                                    <p><strong>Timeline:</strong> 2015-2020</p>
+                                    <p><strong>Key Partners:</strong> Solar Energy Corporation of India (SECI), Adani Green Energy, Azure Power, Acme Solar</p>
+                                    <p><strong>Impact:</strong> Powers 1.3 million homes, avoids 3.8 million tons of CO₂ annually, created 10,000+ jobs during construction</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>🌞 Noor-Ouarzazate Complex, Morocco</h5>
+                                    <p><strong>Location:</strong> Ouarzazate, Morocco</p>
+                                    <p><strong>Capacity:</strong> 580 MW (world's largest CSP plant with thermal storage)</p>
+                                    <p><strong>Timeline:</strong> 2013-2018</p>
+                                    <p><strong>Key Partners:</strong> Moroccan Agency for Sustainable Energy (MASEN), World Bank, African Development Bank, European Investment Bank</p>
+                                    <p><strong>Impact:</strong> 7.5-hour thermal storage enables evening power generation, reduces CO₂ by 760,000 tons/year, supports Morocco's 52% renewable energy target by 2030</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>🌞 Tengger Desert Solar Park, China</h5>
+                                    <p><strong>Location:</strong> Ningxia Province, China</p>
+                                    <p><strong>Capacity:</strong> 1,547 MW</p>
+                                    <p><strong>Timeline:</strong> 2012-2017</p>
+                                    <p><strong>Key Partners:</strong> State Power Investment Corporation, China National Complete Plant Import & Export Corporation</p>
+                                    <p><strong>Impact:</strong> Covers 43 km², equivalent to area of Monaco, demonstrates utility-scale solar viability in arid regions</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>🌞 Desert Sunlight Solar Farm, USA</h5>
+                                    <p><strong>Location:</strong> California, United States</p>
+                                    <p><strong>Capacity:</strong> 550 MW (thin-film CdTe technology)</p>
+                                    <p><strong>Timeline:</strong> 2011-2015</p>
+                                    <p><strong>Key Partners:</strong> First Solar, NextEra Energy Resources, GE Energy Financial Services, Sumitomo Corporation</p>
+                                    <p><strong>Impact:</strong> Powers 160,000 homes, offset 300,000 tons CO₂ annually, created 400 permanent jobs</p>
+                                </div>
+                            </div>
+
+                            <h4>Key Applications</h4>
+                            <ul>
+                                <li><strong>Utility-Scale Solar Farms:</strong> Grid-connected installations (50+ MW)</li>
+                                <li><strong>Distributed Rooftop Systems:</strong> Residential and commercial installations (2-500 kW)</li>
+                                <li><strong>Off-Grid Solutions:</strong> Remote communities, telecommunications, water pumping</li>
+                                <li><strong>Floating Solar (Floatovoltaics):</strong> Reservoirs and water bodies, reduces evaporation</li>
+                                <li><strong>Solar-Powered Transportation:</strong> EV charging infrastructure, solar roads</li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div class="energy-card" onclick="toggleCard(this)">
+                    <div class="energy-card" id="wind-energy" onclick="toggleCard(this)">
                         <div class="energy-header">
                             <div class="energy-icon">
                                 <i class="fas fa-wind"></i>
@@ -145,17 +208,89 @@
                             <h3>Wind Energy</h3>
                         </div>
                         <div class="energy-content">
-                            <p>Wind turbines convert kinetic energy from wind into electricity. Modern turbines can power hundreds of homes from a single installation.</p>
+                            <h4>Technical Overview & Operational Principles</h4>
+                            <p>Wind turbines operate on aerodynamic principles, converting kinetic energy from moving air into rotational mechanical energy, which drives an electrical generator. Modern horizontal-axis wind turbines (HAWTs) feature three blades optimized for maximum energy capture at varying wind speeds, with sophisticated control systems that adjust blade pitch and yaw orientation for optimal performance.</p>
+                            
+                            <p><strong>Core Components:</strong></p>
                             <ul>
-                                <li><strong>Pros:</strong> Clean, cost-effective at scale, land can often still be used for agriculture</li>
-                                <li><strong>Cons:</strong> Visual impact, noise concerns, intermittent generation</li>
-                                <li><strong>Interesting Fact:</strong> A single 2.5 MW turbine can offset 5,000 tons of CO2 annually</li>
+                                <li><strong>Rotor & Blades:</strong> Aerodynamic surfaces (40-120m diameter) designed using advanced composites (fiberglass, carbon fiber)</li>
+                                <li><strong>Nacelle:</strong> Houses gearbox, generator, control systems, and cooling equipment</li>
+                                <li><strong>Tower:</strong> Steel or concrete structures (80-180m height) optimized for wind resource access</li>
+                                <li><strong>Foundation:</strong> Engineered for local soil conditions, offshore turbines use monopiles, jackets, or floating platforms</li>
+                                <li><strong>Power Electronics:</strong> Inverters, transformers, and SCADA systems for grid integration</li>
                             </ul>
-                            <a href="#" class="read-more">Discover Wind Farms →</a>
+
+                            <h4>Turbine Technologies</h4>
+                            <ul>
+                                <li><strong>Onshore Turbines:</strong> 2-6 MW capacity, 80-120m hub heights, capacity factors 30-45%</li>
+                                <li><strong>Offshore Fixed-Bottom:</strong> 8-15 MW capacity, 100-150m hub heights, capacity factors 45-55%</li>
+                                <li><strong>Floating Offshore:</strong> 10-15 MW capacity, accessing deep water sites (>60m depth), semi-submersible or spar platforms</li>
+                                <li><strong>Direct-Drive vs. Geared:</strong> Direct-drive eliminates gearbox, reducing maintenance; geared systems offer higher torque multiplication</li>
+                            </ul>
+
+                            <h4>Current Industry Trends & Innovations</h4>
+                            <ul>
+                                <li><strong>Turbine Upscaling:</strong> Commercial 15+ MW turbines (Vestas V236-15.0, GE Haliade-X 14 MW), rotor diameters exceeding 220m</li>
+                                <li><strong>Longer Blades:</strong> 115m+ blades using advanced materials, swept areas exceeding 40,000 m²</li>
+                                <li><strong>Higher Hub Heights:</strong> Accessing stronger, more consistent winds; onshore turbines now reaching 150m+</li>
+                                <li><strong>Digitalization:</strong> AI-powered predictive maintenance, digital twins, LiDAR-based wind forecasting</li>
+                                <li><strong>Blade Recycling:</strong> Chemical recycling processes to recover composite materials, addressing end-of-life challenges</li>
+                                <li><strong>Hybrid Systems:</strong> Wind-solar-battery combinations for improved capacity factors and grid stability</li>
+                                <li><strong>Offshore Wind-to-Hydrogen:</strong> Direct electrolysis at offshore platforms for green hydrogen production</li>
+                            </ul>
+
+                            <h4>Notable Global Projects</h4>
+                            
+                            <div class="project-showcase">
+                                <div class="project-item">
+                                    <h5>🌬️ Hornsea 2 Offshore Wind Farm, UK</h5>
+                                    <p><strong>Location:</strong> North Sea, 89 km off Yorkshire coast, United Kingdom</p>
+                                    <p><strong>Capacity:</strong> 1,320 MW (world's largest operational offshore wind farm)</p>
+                                    <p><strong>Timeline:</strong> 2016-2022</p>
+                                    <p><strong>Key Partners:</strong> Ørsted (developer), Siemens Gamesa (turbine supplier, 165× 8 MW turbines), Global Marine Group (cable installation)</p>
+                                    <p><strong>Impact:</strong> Powers 1.4 million UK homes, avoids 2.5 million tons CO₂ annually, 462 km² area, created 2,000+ jobs during construction</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>🌬️ Gansu Wind Farm Project, China</h5>
+                                    <p><strong>Location:</strong> Gansu Province, China (Gobi Desert region)</p>
+                                    <p><strong>Capacity:</strong> 8,000 MW planned (phased development, 6,000+ MW operational)</p>
+                                    <p><strong>Timeline:</strong> 2009-ongoing</p>
+                                    <p><strong>Key Partners:</strong> China Longyuan Power Group, China Datang Corporation, Guohua Energy Investment</p>
+                                    <p><strong>Impact:</strong> Part of China's "wind power bases" strategy, demonstrates large-scale onshore deployment, transmission challenges addressed via HVDC lines</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>🌬️ Hywind Tampen, Norway</h5>
+                                    <p><strong>Location:</strong> Norwegian North Sea (140 km offshore)</p>
+                                    <p><strong>Capacity:</strong> 88 MW (world's largest floating offshore wind farm)</p>
+                                    <p><strong>Timeline:</strong> 2019-2022</p>
+                                    <p><strong>Key Partners:</strong> Equinor (operator), Siemens Gamesa (11× 8 MW turbines), Kværner (platform fabrication)</p>
+                                    <p><strong>Impact:</strong> Powers Snorre and Gullfaks oil/gas platforms, reducing offshore operations emissions by 200,000 tons CO₂/year, proves floating technology viability at scale</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>🌬️ Alta Wind Energy Center, USA</h5>
+                                    <p><strong>Location:</strong> Tehachapi Mountains, California, United States</p>
+                                    <p><strong>Capacity:</strong> 1,548 MW (largest onshore wind farm in USA)</p>
+                                    <p><strong>Timeline:</strong> 2010-2013</p>
+                                    <p><strong>Key Partners:</strong> Terra-Gen (operator), GE Renewable Energy, Mitsubishi Heavy Industries</p>
+                                    <p><strong>Impact:</strong> Powers 450,000 homes, 600 turbines across 3,200 hectares, long-term PPAs with Southern California Edison</p>
+                                </div>
+                            </div>
+
+                            <h4>Deployment Strategies</h4>
+                            <ul>
+                                <li><strong>Wind Resource Assessment:</strong> Multi-year LiDAR campaigns, mesoscale modeling, capacity factor optimization</li>
+                                <li><strong>Hybrid Interconnection:</strong> Co-locating wind with solar/storage to maximize transmission utilization</li>
+                                <li><strong>Repowering:</strong> Replacing older turbines with modern units, 2-3× capacity increases on same land</li>
+                                <li><strong>Community Benefit Models:</strong> Revenue sharing, local ownership stakes, economic development agreements</li>
+                                <li><strong>Environmental Mitigation:</strong> Avian radar systems, seasonal curtailment protocols, marine mammal monitoring</li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div class="energy-card" onclick="toggleCard(this)">
+                    <div class="energy-card" id="hydropower" onclick="toggleCard(this)">
                         <div class="energy-header">
                             <div class="energy-icon">
                                 <i class="fas fa-tint"></i>
@@ -163,17 +298,112 @@
                             <h3>Hydropower</h3>
                         </div>
                         <div class="energy-content">
-                            <p>Hydropower uses flowing water to generate electricity, currently providing about 16% of the world's total electricity.</p>
+                            <h4>Technical Overview</h4>
+                            <p>Hydropower harnesses the potential and kinetic energy of water to generate electricity. As water flows from higher to lower elevations, it spins turbines connected to generators. This technology represents the world's oldest and most mature renewable energy source, providing approximately 16% of global electricity and offering crucial grid flexibility through rapid response capabilities.</p>
+                            
+                            <h4>Types of Hydropower Systems</h4>
                             <ul>
-                                <li><strong>Pros:</strong> Reliable, dispatchable, long lifespan (50-100 years)</li>
-                                <li><strong>Cons:</strong> Environmental impact on rivers, high upfront costs</li>
-                                <li><strong>Types:</strong> Dams, run-of-river, pumped storage, and tidal</li>
+                                <li><strong>Conventional Impoundment Dams:</strong> Large reservoirs store water for controlled release, providing dispatchable power and flood control. Capacity: 100+ MW, head heights 50-300m</li>
+                                <li><strong>Run-of-River (RoR):</strong> Minimal or no reservoir, diverts portion of river flow through turbines. Lower environmental impact, limited storage. Capacity: 1-100 MW</li>
+                                <li><strong>Pumped Storage Hydropower (PSH):</strong> Two reservoirs at different elevations; pumps water uphill during low-demand periods, releases during peak demand. Acts as massive battery. Efficiency: 70-85%</li>
+                                <li><strong>Tidal Power:</strong> Harnesses ocean tides using barrages or tidal stream generators. Predictable but geographically limited</li>
+                                <li><strong>Micro/Mini Hydro:</strong> Small-scale installations (<10 MW) for local communities, minimal environmental disruption</li>
                             </ul>
-                            <a href="#" class="read-more">Learn About Hydro →</a>
+
+                            <h4>Generation Methods & Components</h4>
+                            <ul>
+                                <li><strong>Turbine Types:</strong>
+                                    <ul>
+                                        <li><em>Francis Turbines:</em> Most common, medium head (40-600m), 90%+ efficiency</li>
+                                        <li><em>Kaplan Turbines:</em> Low head (<40m), adjustable blades, ideal for RoR</li>
+                                        <li><em>Pelton Wheels:</em> High head (>300m), impulse-type, mountain installations</li>
+                                        <li><em>Bulb Turbines:</em> Horizontal axis, tidal and low-head applications</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Penstock:</strong> Pressurized pipeline delivering water to turbines, optimized for head and flow rate</li>
+                                <li><strong>Spillways:</strong> Safety structures for excess water discharge during floods</li>
+                                <li><strong>Fish Passage Systems:</strong> Ladders, lifts, or bypass channels to maintain aquatic ecosystem connectivity</li>
+                            </ul>
+
+                            <h4>Current Industry Trends</h4>
+                            <ul>
+                                <li><strong>Modernization & Digitalization:</strong> Retrofitting aging infrastructure with digital sensors, predictive analytics for maintenance optimization</li>
+                                <li><strong>Variable Speed Technology:</strong> Frequency converters enable wider operating range, improved efficiency at partial loads</li>
+                                <li><strong>Hybrid Hydro-Solar-Wind:</strong> Complementary generation patterns maximize infrastructure utilization</li>
+                                <li><strong>Environmental Flow Management:</strong> Advanced monitoring and release schedules to balance energy production with ecosystem health</li>
+                                <li><strong>Pumped Storage Expansion:</strong> Critical for integrating intermittent renewables, new closed-loop systems minimize environmental impact</li>
+                                <li><strong>Small Modular Hydro:</strong> Standardized, pre-fabricated units for rapid deployment in remote areas</li>
+                            </ul>
+
+                            <h4>Notable Global Projects</h4>
+                            
+                            <div class="project-showcase">
+                                <div class="project-item">
+                                    <h5>💧 Three Gorges Dam, China</h5>
+                                    <p><strong>Location:</strong> Yangtze River, Hubei Province, China</p>
+                                    <p><strong>Capacity:</strong> 22,500 MW (world's largest hydroelectric power station by installed capacity)</p>
+                                    <p><strong>Timeline:</strong> 1994-2012 (18 years construction)</p>
+                                    <p><strong>Key Partners:</strong> China Yangtze Power (operator), China Three Gorges Corporation, 32× 700 MW Francis turbines + 2× 50 MW generators</p>
+                                    <p><strong>Impact:</strong> Annual generation 100+ TWh, flood control for 15 million people, 600 km reservoir, controversial displacement of 1.3 million residents, navigation improvements for Yangtze shipping</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>💧 Itaipu Dam, Brazil/Paraguay</h5>
+                                    <p><strong>Location:</strong> Paraná River, Brazil-Paraguay border</p>
+                                    <p><strong>Capacity:</strong> 14,000 MW (20× 700 MW Francis turbines)</p>
+                                    <p><strong>Timeline:</strong> 1975-1984</p>
+                                    <p><strong>Key Partners:</strong> Itaipu Binacional (bi-national entity), Alstom/Voith (turbine suppliers)</p>
+                                    <p><strong>Impact:</strong> Supplies 15% of Brazil's electricity, 90% of Paraguay's; record annual generation 103.1 TWh (2016); binational cooperation model</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>💧 Bath County Pumped Storage Station, USA</h5>
+                                    <p><strong>Location:</strong> Virginia, United States</p>
+                                    <p><strong>Capacity:</strong> 3,003 MW (world's largest pumped storage facility by capacity)</p>
+                                    <p><strong>Timeline:</strong> 1977-1985</p>
+                                    <p><strong>Key Partners:</strong> Dominion Energy (operator), 6× 500 MW reversible Francis turbines</p>
+                                    <p><strong>Impact:</strong> Provides grid stability for Mid-Atlantic region, 11-hour full-load generation capacity, supports renewable integration, 8-hour pump-back time</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>💧 Nant de Drance, Switzerland</h5>
+                                    <p><strong>Location:</strong> Swiss Alps, Valais Canton</p>
+                                    <p><strong>Capacity:</strong> 900 MW pumped storage (6× 150 MW reversible Francis turbines)</p>
+                                    <p><strong>Timeline:</strong> 2008-2022 (14 years construction)</p>
+                                    <p><strong>Key Partners:</strong> Alpiq, SBB, IWB, FMV; Alstom/GE (turbines), 17 km underground tunnels</p>
+                                    <p><strong>Impact:</strong> Balances Swiss and European grids, 20-hour generation capacity, exemplary engineering in complex alpine geology</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>💧 Belo Monte Dam, Brazil</h5>
+                                    <p><strong>Location:</strong> Xingu River, Pará State, Brazil</p>
+                                    <p><strong>Capacity:</strong> 11,233 MW (world's 4th largest)</p>
+                                    <p><strong>Timeline:</strong> 2011-2019</p>
+                                    <p><strong>Key Partners:</strong> Norte Energia (consortium), Andritz Hydro, Alstom, Voith</p>
+                                    <p><strong>Impact:</strong> Run-of-river design minimizes reservoir area, supplies 11% of Brazil's electricity, controversial indigenous displacement, seasonal flow variation challenges</p>
+                                </div>
+                            </div>
+
+                            <h4>Environmental Considerations</h4>
+                            <ul>
+                                <li><strong>Positive Impacts:</strong> Zero direct emissions, flood control, water supply regulation, recreation opportunities, long operational life (50-100+ years)</li>
+                                <li><strong>Challenges:</strong>
+                                    <ul>
+                                        <li><em>Ecosystem Disruption:</em> Altered river flow regimes, sediment trapping, temperature changes</li>
+                                        <li><em>Fish Migration:</em> Barriers to spawning routes, addressed through fish ladders and turbine designs</li>
+                                        <li><em>Methane Emissions:</em> Decomposition of organic matter in tropical reservoirs can release CH₄</li>
+                                        <li><em>Land Use:</em> Large reservoirs may inundate forests, agricultural land, or communities</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Mitigation Strategies:</strong> Environmental flow requirements, sediment bypass systems, habitat restoration, community relocation programs with fair compensation</li>
+                            </ul>
+
+                            <h4>Future Outlook</h4>
+                            <p>Hydropower's role is evolving from baseload generation to flexible grid support, enabling higher penetration of variable renewables. Pumped storage capacity is projected to double by 2050, while run-of-river and modernization projects focus on sustainable development aligned with ecosystem preservation.</p>
                         </div>
                     </div>
 
-                    <div class="energy-card hydrogen" onclick="toggleCard(this)">
+                    <div class="energy-card hydrogen" id="green-hydrogen" onclick="toggleCard(this)">
                         <div class="energy-header">
                             <div class="energy-icon">
                                 <i class="fas fa-atom"></i>
@@ -181,54 +411,191 @@
                             <h3>Green Hydrogen</h3>
                         </div>
                         <div class="energy-content">
-                            <p>Green hydrogen is produced through electrolysis using renewable electricity, making it a zero-emissions energy carrier with vast potential for decarbonizing hard-to-electrify sectors.</p>
+                            <h4>Technical Overview</h4>
+                            <p>Green hydrogen is produced through water electrolysis powered exclusively by renewable electricity (solar, wind, hydro), splitting H₂O molecules into hydrogen and oxygen with zero carbon emissions. Unlike gray hydrogen (derived from natural gas via steam methane reforming, emitting 9-12 kg CO₂/kg H₂) or blue hydrogen (with carbon capture), green hydrogen offers a truly sustainable energy carrier for decarbonizing sectors where direct electrification is impractical.</p>
+
+                            <h4>Production Processes</h4>
                             <ul>
-                                <li><strong>Production:</strong> Electrolysis of water using renewable electricity (solar, wind)</li>
-                                <li><strong>Key Uses:</strong> Industrial processes, heavy transport, energy storage, steel production</li>
-                                <li>
-                                    <strong>Advantages:</strong>
+                                <li><strong>Alkaline Electrolysis (AEL):</strong>
                                     <ul>
-                                        <li>Zero carbon emissions when produced renewably</li>
-                                        <li>Can be stored and transported like conventional fuels</li>
-                                        <li>Potential to decarbonize industries that can't use direct electrification</li>
+                                        <li>Mature technology (100+ years), uses liquid KOH or NaOH electrolyte</li>
+                                        <li>Efficiency: 60-70%, operating pressure: 1-30 bar, operating temperature: 60-80°C</li>
+                                        <li>Large-scale systems: 1-5 MW modules, scalable to 100+ MW</li>
+                                        <li>Advantages: Proven reliability, no precious metals, long lifetime (60,000-90,000 hours)</li>
+                                        <li>Manufacturers: NEL Hydrogen, McPhy, Tianjin Mainland</li>
                                     </ul>
                                 </li>
-                                <li>
-                                    <strong>Challenges:</strong>
+                                <li><strong>Proton Exchange Membrane (PEM) Electrolysis:</strong>
                                     <ul>
-                                        <li>Currently more expensive than gray hydrogen (from fossil fuels)</li>
-                                        <li>Requires significant renewable energy capacity</li>
-                                        <li>Needs infrastructure development for storage and transport</li>
+                                        <li>Uses solid polymer electrolyte, rapid response to variable renewable input</li>
+                                        <li>Efficiency: 65-75%, operating pressure: 30-80 bar, compact design</li>
+                                        <li>Advantages: High current density, dynamic operation (10-110% load range), pure hydrogen output (99.999%)</li>
+                                        <li>Challenges: Requires platinum-group metals (iridium, platinum), higher capex</li>
+                                        <li>Manufacturers: Siemens Energy, ITM Power, Plug Power</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Solid Oxide Electrolysis Cells (SOEC):</strong>
+                                    <ul>
+                                        <li>High-temperature electrolysis (700-900°C), uses ceramic electrolyte</li>
+                                        <li>Efficiency: 80-90% (electrical + thermal energy), reversible fuel cell operation</li>
+                                        <li>Development stage: Pilot/demonstration projects, commercial scale by 2025-2030</li>
+                                        <li>Ideal for industrial waste heat integration</li>
+                                        <li>Leaders: Haldor Topsoe, Sunfire, Bloom Energy</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Anion Exchange Membrane (AEM):</strong>
+                                    <ul>
+                                        <li>Emerging technology combining AEL and PEM advantages</li>
+                                        <li>No precious metals required, alkaline chemistry with solid membrane</li>
+                                        <li>Current status: Lab/pilot scale, targeting commercial deployment 2026-2028</li>
                                     </ul>
                                 </li>
                             </ul>
 
+                            <h4>Storage Solutions</h4>
+                            <ul>
+                                <li><strong>Compressed Gas Storage:</strong> 350-700 bar pressure vessels, most common for transport applications, energy density 0.5-1.3 kWh/L</li>
+                                <li><strong>Liquid Hydrogen (LH₂):</strong> Cryogenic storage at -253°C, higher density (2.4 kWh/L), energy-intensive liquefaction (30% energy penalty), used for maritime/aerospace</li>
+                                <li><strong>Underground Storage:</strong> Salt caverns (1,000+ bar), depleted gas fields, aquifers for seasonal/large-scale storage (TWh capacity)</li>
+                                <li><strong>Metal Hydrides:</strong> Solid-state storage in metal alloys, safe but lower gravimetric density, R&D stage for automotive</li>
+                                <li><strong>Liquid Organic Hydrogen Carriers (LOHC):</strong> Chemical bonding to organic molecules (e.g., toluene/methylcyclohexane), ambient pressure/temperature transport, dehydrogenation required at end-use</li>
+                                <li><strong>Ammonia (NH₃):</strong> Hydrogen carrier via Haber-Bosch process, liquid at -33°C or 8 bar, existing infrastructure, cracking required for fuel cell use</li>
+                            </ul>
+
+                            <h4>Current Industry Trends</h4>
+                            <ul>
+                                <li><strong>Gigawatt-Scale Projects:</strong> Transition from MW pilots to GW electrolyzer deployments by 2025-2030</li>
+                                <li><strong>Cost Reduction Trajectory:</strong> Green H₂ production costs falling from $5-6/kg (2020) to projected $1-2/kg by 2030 through scale and renewable energy cost declines</li>
+                                <li><strong>Electrolyzer Manufacturing Scale-Up:</strong> Global capacity targets 100-200 GW/year by 2030 (vs. 10 GW/year in 2023)</li>
+                                <li><strong>Offshore Wind-to-Hydrogen:</strong> Integrated offshore platforms combining wind turbines with electrolyzers, subsea H₂ pipelines</li>
+                                <li><strong>Policy Support:</strong> EU REPowerEU (10 MT green H₂ by 2030), US Inflation Reduction Act ($3/kg production tax credit), national hydrogen strategies in 40+ countries</li>
+                                <li><strong>Certification Schemes:</strong> Guarantees of Origin (GO), CertifHy standards ensuring <3.4 kg CO₂e/kg H₂ lifecycle emissions</li>
+                                <li><strong>Co-Location with Industry:</strong> Direct connections to refineries, ammonia plants, steel mills to bypass distribution costs</li>
+                            </ul>
+
+                            <h4>Notable Global Projects</h4>
+                            
+                            <div class="project-showcase">
+                                <div class="project-item">
+                                    <h5>⚡ HyDeal España, Spain</h5>
+                                    <p><strong>Location:</strong> Castile and León, Spain</p>
+                                    <p><strong>Capacity:</strong> 9.5 GW solar + 7.4 GW electrolyzers (world's largest green hydrogen project planned)</p>
+                                    <p><strong>Timeline:</strong> 2025-2030</p>
+                                    <p><strong>Key Partners:</strong> ArcelorMittal, Enagás, Grupo Fertiberia, DH2 Energy, solar developers consortium</p>
+                                    <p><strong>Impact:</strong> Target production 330,000 tons H₂/year by 2030, decarbonize Spanish steel and fertilizer industries, €10 billion investment, aims for €1.50/kg production cost</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>⚡ NEOM Green Hydrogen Project, Saudi Arabia</h5>
+                                    <p><strong>Location:</strong> NEOM City, Tabuk Province, Saudi Arabia</p>
+                                    <p><strong>Capacity:</strong> 4 GW solar+wind + 2.2 GW electrolyzer</p>
+                                    <p><strong>Timeline:</strong> 2020-2026</p>
+                                    <p><strong>Key Partners:</strong> ACWA Power, Air Products, NEOM (PIF), thyssenkrupp nucera (electrolyzers), Haldor Topsoe (ammonia synthesis)</p>
+                                    <p><strong>Impact:</strong> 650 tons H₂/day → 1.2 MT ammonia/year for export, powers 20,000 hydrogen buses equivalent, $8.4 billion investment, will be world's largest upon completion</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>⚡ H2-Fifty, Netherlands</h5>
+                                    <p><strong>Location:</strong> Eemshaven, Groningen, Netherlands</p>
+                                    <p><strong>Capacity:</strong> 50 MW PEM electrolyzer (operational 2024)</p>
+                                    <p><strong>Timeline:</strong> 2021-2024</p>
+                                    <p><strong>Key Partners:</strong> Gasunie, Vattenfall, Groningen Seaports, ITM Power (10 MW PEM modules)</p>
+                                    <p><strong>Impact:</strong> 8,000 tons H₂/year, supplies northern Netherlands industry, demonstrates utility-scale PEM technology, paves way for 100+ GW European hydrogen backbone</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>⚡ HyStation, Japan</h5>
+                                    <p><strong>Location:</strong> Fukushima, Japan (Fukushima Hydrogen Energy Research Field)</p>
+                                    <p><strong>Capacity:</strong> 20 MW solar + 10 MW electrolyzer</p>
+                                    <p><strong>Timeline:</strong> 2018-2020</p>
+                                    <p><strong>Key Partners:</strong> Toshiba Energy Systems, Tohoku Electric Power, NEDO (New Energy and Industrial Technology Development Organization)</p>
+                                    <p><strong>Impact:</strong> 900 tons H₂/year, powered Tokyo 2020 Olympics torch and venues, largest green hydrogen facility in Japan, demonstration of demand-response electrolysis</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>⚡ Hy Stor Energy, USA</h5>
+                                    <p><strong>Location:</strong> Mississippi, United States (salt cavern storage)</p>
+                                    <p><strong>Capacity:</strong> 1 GW solar + 600 MW electrolyzers + salt cavern storage</p>
+                                    <p><strong>Timeline:</strong> 2024-2028</p>
+                                    <p><strong>Key Partners:</strong> Hy Stor Energy, Mitsubishi Power Americas, private equity investors</p>
+                                    <p><strong>Impact:</strong> First utility-scale green hydrogen hub in US, 60,000 tons H₂/year, demonstrates long-duration storage (weeks/months), targets industrial decarbonization along Gulf Coast</p>
+                                </div>
+
+                                <div class="project-item">
+                                    <h5>⚡ Asian Renewable Energy Hub, Australia</h5>
+                                    <p><strong>Location:</strong> Pilbara region, Western Australia</p>
+                                    <p><strong>Capacity:</strong> 26 GW wind+solar + 14 GW electrolyzers</p>
+                                    <p><strong>Timeline:</strong> 2028-2035 (phased)</p>
+                                    <p><strong>Key Partners:</strong> InterContinental Energy, CWP Global, Vestas, bp (strategic partner)</p>
+                                    <p><strong>Impact:</strong> 1.6 MT green hydrogen/year (or 9 MT ammonia), export to Asia (Japan, South Korea, Singapore), $36 billion project, world's largest renewable energy project</p>
+                                </div>
+                            </div>
+
+                            <h4>Emerging Use Cases</h4>
+                            <ul>
+                                <li><strong>Steel Production (Direct Reduced Iron):</strong> Replace coal/coke with H₂ in blast furnaces, HYBRIT (Sweden), H2 Green Steel, Thyssenkrupp trials</li>
+                                <li><strong>Ammonia Synthesis:</strong> Green fertilizers replacing Haber-Bosch from natural gas, critical for food security</li>
+                                <li><strong>Refining & Petrochemicals:</strong> Desulfurization, hydrocracking, methanol production from green H₂ + captured CO₂</li>
+                                <li><strong>Heavy-Duty Transport:</strong>
+                                    <ul>
+                                        <li><em>Long-Haul Trucking:</em> Fuel cell trucks (Nikola, Hyundai XCIENT), 400+ km range</li>
+                                        <li><em>Maritime Shipping:</em> Ammonia/H₂ fuel cells for cargo vessels, Maersk net-zero 2040 target</li>
+                                        <li><em>Aviation:</em> Liquid H₂ for medium-haul flights (Airbus ZEROe concept), SAF via H₂-based e-fuels</li>
+                                        <li><em>Rail:</em> Hydrogen trains (Alstom Coradia iLint) for non-electrified routes</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Grid Balancing:</strong> Seasonal energy storage, converting summer solar surplus to winter heating/power via H₂</li>
+                                <li><strong>Heating:</strong> Blending H₂ into natural gas networks (5-20%), dedicated H₂ grids for industrial zones</li>
+                                <li><strong>E-Fuels:</strong> Synthetic methane, methanol, jet fuel via H₂ + CO₂ (power-to-X pathways)</li>
+                            </ul>
+
                             <div class="hydrogen-comparison">
-                                <h4>Hydrogen Production Methods:</h4>
+                                <h4>Hydrogen Production Methods Comparison:</h4>
                                 <table>
                                     <tr>
                                         <th>Type</th>
                                         <th>Production Method</th>
-                                        <th>CO2 Emissions</th>
+                                        <th>CO₂ Emissions</th>
+                                        <th>Cost (2024)</th>
+                                        <th>Global Share</th>
                                     </tr>
                                     <tr>
                                         <td><strong>Gray</strong></td>
-                                        <td>Steam methane reforming</td>
-                                        <td>High (9-12 kg CO2/kg H2)</td>
+                                        <td>Steam methane reforming (SMR)</td>
+                                        <td>High (9-12 kg CO₂/kg H₂)</td>
+                                        <td>$1.0-2.5/kg</td>
+                                        <td>~95%</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Blue</strong></td>
-                                        <td>Steam reforming with CCS</td>
-                                        <td>Reduced (1-3 kg CO2/kg H2)</td>
+                                        <td>SMR + Carbon Capture & Storage</td>
+                                        <td>Reduced (1-3 kg CO₂/kg H₂)</td>
+                                        <td>$2.0-3.5/kg</td>
+                                        <td>~1%</td>
+                                    </tr>
+                                    <tr style="color: #4CAF50;">
+                                        <td><strong>Green</strong></td>
+                                        <td>Electrolysis + Renewable Power</td>
+                                        <td>Zero (lifecycle <0.5 kg CO₂e/kg H₂)</td>
+                                        <td>$3.5-6.0/kg (falling to $1-2 by 2030)</td>
+                                        <td>~4%</td>
                                     </tr>
                                     <tr>
-                                        <td style="color: #4CAF50;"><strong>Green</strong></td>
-                                        <td>Electrolysis + Renewables</td>
-                                        <td>Zero</td>
+                                        <td><strong>Turquoise</strong></td>
+                                        <td>Methane pyrolysis → H₂ + solid carbon</td>
+                                        <td>Near-zero (if renewable heat used)</td>
+                                        <td>$2.5-4.0/kg (pilot stage)</td>
+                                        <td><0.1%</td>
                                     </tr>
                                 </table>
                             </div>
-                            <a href="#" class="read-more">Explore Hydrogen Projects →</a>
+
+                            <h4>Challenges & Outlook</h4>
+                            <p><strong>Current Barriers:</strong> High production costs (electrolyzer capex, renewable electricity prices), limited infrastructure (pipelines, refueling stations), energy losses in conversion chains (electrolysis 25-35%, liquefaction 30%, fuel cells 40-60%), regulatory fragmentation.</p>
+                            
+                            <p><strong>2030 Projections:</strong> Global green hydrogen production capacity reaching 25-40 MT/year (vs. 0.3 MT in 2023), electrolyzer costs declining 50-70%, emergence of transcontinental hydrogen trade (Middle East/Australia to Europe/Asia), grid parity with gray hydrogen in regions with abundant cheap renewables.</p>
+                            
+                            <p><strong>Role in Net-Zero:</strong> IEA estimates hydrogen must scale to 200+ MT/year by 2050 to meet 1.5°C pathways, representing 13% of final energy demand and critical for decarbonizing "hard-to-abate" sectors.</p>
                         </div>
                     </div>
                 </div>
