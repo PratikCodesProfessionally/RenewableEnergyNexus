@@ -179,20 +179,101 @@ function calculateSavingsDE() {
 
 // Newsletter System
 function setupNewsletter() {
-    document.getElementById('newsletter-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const emailInput = this.querySelector('input');
-        const messageEl = document.querySelector('.subscription-message');
+    const form = document.getElementById('newsletter-form');
+    if (!form) return;
 
-        if (!/\S+@\S+\.\S+/.test(emailInput.value)) {
-            messageEl.textContent = 'Please enter a valid email address';
+    // Update subscriber count on page load
+    updateSubscriberCount();
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const emailInput = document.getElementById('subscriber-email');
+        const firstNameInput = document.getElementById('subscriber-firstname');
+        const lastNameInput = document.getElementById('subscriber-lastname');
+        const consentCheckbox = document.getElementById('email-consent');
+        const messageEl = document.querySelector('.subscription-message');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        // Clear previous messages
+        messageEl.textContent = '';
+        messageEl.className = 'subscription-message';
+
+        // Validate email
+        if (!subscriptionManager.validateEmail(emailInput.value)) {
+            showMessage(messageEl, 'Please enter a valid email address', 'error');
             return;
         }
 
-        messageEl.textContent = 'Thank you for subscribing! Check your email to confirm.';
-        messageEl.style.color = '#4CAF50';
-        emailInput.value = '';
+        // Check consent
+        if (!consentCheckbox.checked) {
+            showMessage(messageEl, 'Please agree to receive emails from us', 'error');
+            return;
+        }
+
+        // Disable submit button during processing
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
+
+        try {
+            const result = await subscriptionManager.subscribe(
+                emailInput.value,
+                consentCheckbox.checked,
+                {
+                    firstName: firstNameInput.value,
+                    lastName: lastNameInput.value
+                }
+            );
+
+            if (result.success) {
+                showMessage(messageEl, result.message, 'success');
+                form.reset();
+                updateSubscriberCount();
+                
+                // Show success animation
+                confetti();
+            }
+        } catch (error) {
+            showMessage(messageEl, error.message, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-envelope"></i> Subscribe Now';
+        }
     });
+}
+
+// Show message with styling
+function showMessage(element, message, type) {
+    element.textContent = message;
+    element.className = `subscription-message ${type}`;
+    element.style.display = 'block';
+    
+    // Auto-hide success messages after 5 seconds
+    if (type === 'success') {
+        setTimeout(() => {
+            element.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Update subscriber count display
+function updateSubscriberCount() {
+    const countEl = document.getElementById('subscriber-count');
+    if (countEl && typeof subscriptionManager !== 'undefined') {
+        const count = subscriptionManager.getSubscriberCount();
+        if (count > 0) {
+            countEl.textContent = `Join ${count} other subscriber${count !== 1 ? 's' : ''}`;
+        } else {
+            countEl.textContent = 'Be the first to subscribe!';
+        }
+    }
+}
+
+// Simple confetti effect for successful subscription
+function confetti() {
+    if (typeof confetti === 'undefined') {
+        console.log('🎉 Subscription successful!');
+    }
 }
 
 // Reaction tracking

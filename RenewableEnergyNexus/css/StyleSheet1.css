@@ -596,43 +596,236 @@ footer {
 /* Newsletter Form */
 .newsletter {
     margin: 2rem 0;
-    padding: 1.5rem;
-    background: rgba(0,0,0,0.2);
-    border-radius: 8px;
+    padding: 2rem;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
+
+    .newsletter h3 {
+        color: var(--accent);
+        margin-top: 0;
+        font-size: 1.8rem;
+        text-align: center;
+    }
+
+    .newsletter > p {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 1.05rem;
+        opacity: 0.9;
+    }
 
 .newsletter-form {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
-    .newsletter-form input {
-        flex: 1;
-        padding: 0.75rem;
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
-        color: white;
-        border-radius: 4px;
+.form-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.form-input {
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+    .form-input::placeholder {
+        color: rgba(255,255,255,0.6);
     }
 
-    .newsletter-form button {
-        padding: 0 1.5rem;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 4px;
+    .form-input:focus {
+        background: rgba(255,255,255,0.25);
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+    }
+
+.half-width {
+    flex: 1;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.consent-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+    .consent-checkbox input[type="checkbox"] {
+        margin-top: 4px;
+        width: 18px;
+        height: 18px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        flex-shrink: 0;
     }
 
-        .newsletter-form button:hover {
-            background: var(--accent);
+    .consent-checkbox label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .consent-checkbox label a {
+            text-decoration: underline;
         }
+
+            .consent-checkbox label a:hover {
+                color: white;
+            }
+
+.subscribe-btn {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, var(--primary) 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+    .subscribe-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, var(--accent) 0%, #f9a825 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+    }
+
+    .subscribe-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 
 .subscription-message {
     margin-top: 1rem;
-    color: var(--accent);
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 500;
+    display: none;
+}
+
+    .subscription-message.success {
+        background: rgba(76, 175, 80, 0.2);
+        border: 2px solid var(--primary);
+        color: #a5d6a7;
+    }
+
+    .subscription-message.error {
+        background: rgba(244, 67, 54, 0.2);
+        border: 2px solid #f44336;
+        color: #ef9a9a;
+    }
+
+    .subscription-message.warning {
+        background: rgba(255, 193, 7, 0.2);
+        border: 2px solid var(--accent);
+        color: var(--accent);
+    }
+
+.subscriber-stats {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.8);
+}
+
+    .subscriber-stats i {
+        color: var(--accent);
+        margin-right: 0.5rem;
+    }
+
+/* Mobile Responsive Newsletter */
+@media (max-width: 768px) {
+    .newsletter {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .newsletter h3 {
+        font-size: 1.5rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .half-width {
+        width: 100%;
+    }
+
+    .form-input {
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.875rem;
+    }
+
+    .subscribe-btn {
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .consent-checkbox {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .newsletter {
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+
+    .newsletter h3 {
+        font-size: 1.3rem;
+    }
+
+    .newsletter > p {
+        font-size: 0.95rem;
+    }
+
+    .form-input {
+        padding: 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .subscribe-btn {
+        padding: 0.9rem;
+        font-size: 1rem;
+    }
+
+    .consent-checkbox {
+        font-size: 0.8rem;
+    }
+
+    .consent-checkbox input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+    .subscriber-stats {
+        font-size: 0.85rem;
+    }
 }
 
 /* ==================== */
