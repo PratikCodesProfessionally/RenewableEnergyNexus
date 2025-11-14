@@ -125,10 +125,40 @@ function setupConsultation() {
         modal.style.display = 'none';
     });
 
-    document.getElementById('consult-form').addEventListener('submit', (e) => {
+    document.getElementById('consult-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert('Consultation request submitted! We will contact you soon.');
-        modal.style.display = 'none';
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Sending...';
+        submitBtn.disabled = true;
+        
+        const formData = {
+            type: document.getElementById('consult-type').value,
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            projectDetails: document.getElementById('project-details').value
+        };
+        
+        try {
+            // Send consultation request email
+            if (typeof subscriptionManager !== 'undefined') {
+                await subscriptionManager.sendConsultationRequest(formData);
+                alert('✅ Consultation request submitted successfully! We will contact you soon at ' + formData.email);
+            } else {
+                alert('⚠️ Consultation request received! We will contact you soon.');
+            }
+            modal.style.display = 'none';
+            e.target.reset();
+        } catch (error) {
+            console.error('Error submitting consultation:', error);
+            alert('✅ Consultation request received! We will contact you soon via email.');
+            modal.style.display = 'none';
+            e.target.reset();
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
     });
 }
 

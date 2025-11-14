@@ -1,0 +1,15 @@
+# Netlify Configuration
+[build]
+  publish = "."
+  command = "echo 'No build needed - static site'"
+
+# Environment variables hint
+# Add these in Netlify Dashboard > Site settings > Environment variables:
+# BREVO_API_KEY = your-api-key-here
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"

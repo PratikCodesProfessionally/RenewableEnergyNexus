@@ -412,6 +412,44 @@ footer {
     margin-top: auto;
 }
 
+.contact-info {
+    margin-bottom: 1.5rem;
+}
+
+.contact-info h3 {
+    color: var(--accent);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.contact-info h3 i {
+    margin-right: 0.5rem;
+}
+
+.email-link {
+    display: inline-block;
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 193, 7, 0.3);
+}
+
+.email-link:hover {
+    background: rgba(255, 193, 7, 0.2);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.email-link i {
+    margin-right: 0.5rem;
+    color: var(--accent);
+}
+
 .social-links {
     display: flex;
     justify-content: center;
