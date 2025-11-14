@@ -39,43 +39,50 @@ function initMap() {
     });
 }
 
-// Energy Card Interactions
-function setupEnergyCards() {
-    document.querySelectorAll('.energy-card').forEach(card => {
-        card.addEventListener('click', function() {
-            // Close other cards
-            document.querySelectorAll('.energy-card').forEach(c => {
-                if (c !== this) c.classList.remove('active');
-            });
-            
-            // Toggle this card
-            this.classList.toggle('active');
-            
-            // Update calculator energy type
-            const energyType = this.dataset.energyType;
-            if (energyType) {
-                document.getElementById('energy-type').value = energyType;
-            }
-            
-            // Handle map initialization
-            if (this.classList.contains('active')) {
-                setTimeout(() => {
-                    if (this.querySelector('#projects-map')) {
-                        if (!map) {
-                            initMap();
-                        } else {
-                            map.invalidateSize();
-                        }
-                    }
-                }, 300);
-            }
-            
-            // Recalculate if needed
-            if (document.getElementById('energy-use').value) {
-                calculateSavings();
-            }
-        });
+// Toggle Card Function - called from HTML onclick
+function toggleCard(card) {
+    // Close other cards
+    document.querySelectorAll('.energy-card').forEach(c => {
+        if (c !== card) c.classList.remove('active');
     });
+    
+    // Toggle this card
+    card.classList.toggle('active');
+    
+    // Update calculator energy type
+    const energyType = card.dataset.energyType;
+    if (energyType) {
+        const energyTypeSelect = document.getElementById('energy-type');
+        if (energyTypeSelect) {
+            energyTypeSelect.value = energyType;
+        }
+    }
+    
+    // Handle map initialization
+    if (card.classList.contains('active')) {
+        setTimeout(() => {
+            if (card.querySelector('#projects-map')) {
+                if (!map) {
+                    initMap();
+                } else {
+                    map.invalidateSize();
+                }
+            }
+        }, 300);
+    }
+    
+    // Recalculate if needed
+    const energyUseInput = document.getElementById('energy-use');
+    if (energyUseInput && energyUseInput.value) {
+        calculateSavingsDE();
+    }
+}
+
+// Energy Card Interactions (backup for programmatic setup)
+function setupEnergyCards() {
+    // This function is kept for backward compatibility
+    // Cards now use onclick="toggleCard(this)" in HTML
+    console.log('Energy cards ready with toggleCard function');
 }
 
 // Consultation System
@@ -188,15 +195,20 @@ function setupNewsletter() {
     });
 }
 
+// Reaction tracking
+function trackReaction(type) {
+    console.log('User reaction:', type);
+    if (type === 'like') {
+        alert('Thanks for your feedback!');
+    } else if (type === 'share') {
+        alert('Thanks for sharing!');
+    }
+}
+
 // User Feedback System
 function setupReactions() {
-    document.querySelectorAll('.reaction-buttons button').forEach(button => {
-        button.addEventListener('click', function() {
-            const type = this.dataset.reactionType;
-            console.log('User reaction:', type);
-            alert(`Thanks for your ${type === 'like' ? 'feedback' : 'share'}!`);
-        });
-    });
+    // Reactions are now handled via onclick="trackReaction(type)" in HTML
+    console.log('Reaction tracking ready');
 }
 
 // Article Loading
@@ -260,6 +272,11 @@ function setupSmoothScroll() {
     });
 }
 
+// Show sources function
+function showSources() {
+    alert('Data sources:\n- German Federal Network Agency (Bundesnetzagentur)\n- Fraunhofer ISE Solar Reports\n- German Wind Energy Association (BWE)\n- International Renewable Energy Agency (IRENA)');
+}
+
 // Initialize Everything
 document.addEventListener('DOMContentLoaded', () => {
     setupEnergyCards();
@@ -267,22 +284,25 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNewsletter();
     setupReactions();
     setupSmoothScroll();
-    loadArticles();
-
-    // Calculator
-    document.getElementById('calculate-btn').addEventListener('click', (e) => {
-        e.preventDefault();
-        calculateSavings();
-    });
+    
+    // View More Articles button
+    const viewMoreBtn = document.getElementById('view-more-articles');
+    if (viewMoreBtn) {
+        viewMoreBtn.addEventListener('click', () => {
+            alert('More articles coming soon! Stay tuned.');
+        });
+    }
 
     // GSAP Animations
-    gsap.from(".feature-card", {
-        duration: 1,
-        y: 50,
-        opacity: 0,
-        stagger: 0.2,
-        ease: "power2.out"
-    });
+    if (typeof gsap !== 'undefined') {
+        gsap.from(".feature-card", {
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power2.out"
+        });
+    }
 
     // Service Worker
     if ('serviceWorker' in navigator) {
