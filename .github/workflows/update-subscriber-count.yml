@@ -1,0 +1,86 @@
+name: Update Subscriber Count
+
+on:
+  # Run daily at midnight UTC
+  schedule:
+    - cron: '0 0 * * *'
+  
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+  
+  # Also run on push to main (to test)
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/update-subscriber-count.yml'
+
+jobs:
+  update-count:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch subscriber count from Brevo
+        id: fetch-count
+        run: |
+          # Fetch subscriber count from Brevo API
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "accept: application/json" \
+            -H "api-key: ${{ secrets.BREVO_API_KEY }}" \
+            "https://api.brevo.com/v3/contacts/lists/2")
+          
+          # Extract HTTP status code
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            # Extract subscriber count from response
+            COUNT=$(echo "$BODY" | jq -r '.uniqueSubscribers // .totalSubscribers // 0')
+            echo "Subscriber count from Brevo: $COUNT"
+            echo "count=$COUNT" >> $GITHUB_OUTPUT
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "Failed to fetch from Brevo API"
+            echo "Response: $BODY"
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update subscriber-count.json
+        if: steps.fetch-count.outputs.success == 'true'
+        run: |
+          COUNT=${{ steps.fetch-count.outputs.count }}
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Create updated JSON
+          cat > data/subscriber-count.json << EOF
+          {
+            "count": $COUNT,
+            "lastUpdated": "$TIMESTAMP",
+            "source": "brevo"
+          }
+          EOF
+          
+          echo "Updated subscriber-count.json with count: $COUNT"
+
+      - name: Commit and push changes
+        if: steps.fetch-count.outputs.success == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Check if there are changes
+          if git diff --quiet data/subscriber-count.json; then
+            echo "No changes to subscriber count"
+          else
+            git add data/subscriber-count.json
+            git commit -m "Update subscriber count to ${{ steps.fetch-count.outputs.count }}"
+            git push
+            echo "Changes committed and pushed"
+          fi

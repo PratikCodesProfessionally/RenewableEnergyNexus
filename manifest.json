@@ -1,0 +1,16 @@
+{
+    "name": "Renewable Energy Nexus",
+    "short_name": "REN",
+    "description": "Your comprehensive resource for understanding and implementing renewable energy solutions",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a2b4a",
+    "theme_color": "#4CAF50",
+    "icons": [
+        {
+            "src": "RenewableEnergyNexus/Images/windmills.jpg",
+            "sizes": "512x512",
+            "type": "image/jpeg"
+        }
+    ]
+}

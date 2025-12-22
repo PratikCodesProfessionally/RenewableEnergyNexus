@@ -15,6 +15,10 @@ class EmailSubscriptionManager {
         this.apiEndpoint = 'https://api.brevo.com/v3';
         this.listId = 2;
         this.subscribers = this.loadSubscribers();
+        
+        // Baseline subscriber count from Brevo (update this periodically)
+        // This ensures the count is consistent across all browsers
+        this.baselineSubscriberCount = 2; // Your actual Brevo subscribers
     }
 
     /**
@@ -227,9 +231,27 @@ class EmailSubscriptionManager {
 
     /**
      * Get total subscriber count
+     * Returns the baseline count (from Brevo) plus any local subscribers
+     * This ensures consistency across browsers
      */
     getSubscriberCount() {
-        return this.subscribers.length;
+        // Use baseline count to show real subscriber numbers across all browsers
+        // Local subscribers are added on top (for new signups before sync)
+        return this.baselineSubscriberCount + this.subscribers.length;
+    }
+
+    /**
+     * Get only the baseline subscriber count (from Brevo)
+     */
+    getBaselineCount() {
+        return this.baselineSubscriberCount;
+    }
+
+    /**
+     * Update baseline count (call this when you check Brevo dashboard)
+     */
+    setBaselineCount(count) {
+        this.baselineSubscriberCount = count;
     }
 
     /**
@@ -613,6 +635,9 @@ Unsubscribe: {{unsubscribe}}
 
 // Initialize subscription manager
 const subscriptionManager = new EmailSubscriptionManager();
+
+// Subscriber count is now hardcoded in HTML for consistency across browsers
+// To update the count, change it in index.html
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {

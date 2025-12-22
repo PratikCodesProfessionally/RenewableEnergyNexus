@@ -287,15 +287,27 @@ function showMessage(element, message, type) {
 }
 
 // Update subscriber count display
-function updateSubscriberCount() {
+// Fetches count from static JSON file (updated daily by GitHub Actions)
+async function updateSubscriberCount() {
     const countEl = document.getElementById('subscriber-count');
-    if (countEl && typeof subscriptionManager !== 'undefined') {
-        const count = subscriptionManager.getSubscriberCount();
-        if (count > 0) {
-            countEl.textContent = `Join ${count} other subscriber${count !== 1 ? 's' : ''}`;
-        } else {
-            countEl.textContent = 'Be the first to subscribe!';
+    if (!countEl) return;
+
+    try {
+        // Fetch from static JSON file (updated by GitHub Actions)
+        const response = await fetch('/data/subscriber-count.json');
+        
+        if (response.ok) {
+            const data = await response.json();
+            const count = data.count || 0;
+            
+            if (count > 0) {
+                countEl.textContent = `Join ${count} other subscriber${count !== 1 ? 's' : ''}`;
+            }
+            console.log('Subscriber count:', count, '(last updated:', data.lastUpdated, ')');
         }
+    } catch (error) {
+        // On error, keep the HTML default
+        console.log('Using default subscriber count');
     }
 }
 
@@ -418,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Service Worker
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
+            navigator.serviceWorker.register('/sw.js')
                 .catch(err => console.error('Service Worker registration failed:', err));
         });
     }
