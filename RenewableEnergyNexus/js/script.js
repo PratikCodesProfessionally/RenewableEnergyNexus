@@ -287,14 +287,14 @@ function showMessage(element, message, type) {
 }
 
 // Update subscriber count display
-// Fetches count from static JSON file (updated daily by GitHub Actions)
+// Fetches count from Netlify function (real-time from Brevo API)
 async function updateSubscriberCount() {
     const countEl = document.getElementById('subscriber-count');
     if (!countEl) return;
 
     try {
-        // Fetch from static JSON file (updated by GitHub Actions)
-        const response = await fetch('/data/subscriber-count.json');
+        // Fetch from Netlify function (real-time from Brevo API)
+        const response = await fetch('/.netlify/functions/get-subscriber-count');
         
         if (response.ok) {
             const data = await response.json();
@@ -303,11 +303,13 @@ async function updateSubscriberCount() {
             if (count > 0) {
                 countEl.textContent = `Join ${count} other subscriber${count !== 1 ? 's' : ''}`;
             }
-            console.log('Subscriber count:', count, '(last updated:', data.lastUpdated, ')');
+            console.log('Subscriber count:', count, '(source:', data.source, ')');
+        } else {
+            console.log('Unable to fetch subscriber count from API');
         }
     } catch (error) {
         // On error, keep the HTML default
-        console.log('Using default subscriber count');
+        console.log('Using default subscriber count:', error.message);
     }
 }
 

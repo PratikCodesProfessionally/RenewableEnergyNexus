@@ -65,15 +65,18 @@ exports.handler = async (event, context) => {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Brevo API Error:', errorData);
+            console.error('Status:', response.status);
             
-            // Return fallback on error
+            // Return error details for debugging
             return {
                 statusCode: 200,
                 headers,
                 body: JSON.stringify({ 
                     count: 2, 
                     source: 'fallback',
-                    message: 'API error, using fallback count'
+                    message: 'API error, using fallback count',
+                    error: errorData,
+                    status: response.status
                 })
             };
         }
