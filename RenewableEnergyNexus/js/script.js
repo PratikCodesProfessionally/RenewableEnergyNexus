@@ -298,14 +298,21 @@ async function updateSubscriberCount() {
         
         if (response.ok) {
             const data = await response.json();
+            console.log('Full API response:', data);
             const count = data.count || 0;
             
             if (count > 0) {
                 countEl.textContent = `Join ${count} other subscriber${count !== 1 ? 's' : ''}`;
             }
             console.log('Subscriber count:', count, '(source:', data.source, ')');
+            if (data.message) {
+                console.warn('API Message:', data.message);
+            }
+            if (data.error) {
+                console.error('API Error Details:', data.error);
+            }
         } else {
-            console.log('Unable to fetch subscriber count from API');
+            console.log('Unable to fetch subscriber count from API - Status:', response.status);
         }
     } catch (error) {
         // On error, keep the HTML default
