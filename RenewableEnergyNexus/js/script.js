@@ -309,7 +309,7 @@ async function updateSubscriberCount() {
                 console.warn('API Message:', data.message);
             }
             if (data.error) {
-                console.error('API Error Details:', data.error);
+                console.error('API Error Details:', JSON.stringify(data.error, null, 2));
             }
         } else {
             console.log('Unable to fetch subscriber count from API - Status:', response.status);

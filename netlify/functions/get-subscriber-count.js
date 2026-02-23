@@ -63,9 +63,14 @@ exports.handler = async (event, context) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Brevo API Error:', errorData);
-            console.error('Status:', response.status);
+            let errorData = {};
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                errorData = { message: 'Unable to parse error response' };
+            }
+            console.error('Brevo API Error Status:', response.status, response.statusText);
+            console.error('Brevo API Error Details:', JSON.stringify(errorData, null, 2));
             
             // Return error details for debugging
             return {
@@ -75,8 +80,11 @@ exports.handler = async (event, context) => {
                     count: 2, 
                     source: 'fallback',
                     message: 'API error, using fallback count',
-                    error: errorData,
-                    status: response.status
+                    error: {
+                        status: response.status,
+                        statusText: response.statusText,
+                        details: errorData
+                    }
                 })
             };
         }
