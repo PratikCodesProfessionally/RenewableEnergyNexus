@@ -11,7 +11,8 @@
 
 class EmailSubscriptionManager {
     constructor() {
-        this.apiKey = 'YOUR_BREVO_API_KEY'; // Replace with your actual API key
+        // API key is now handled securely by Netlify functions
+        // No longer stored in frontend code
         this.apiEndpoint = 'https://api.brevo.com/v3';
         this.listId = 2;
         this.subscribers = this.loadSubscribers();
@@ -61,38 +62,30 @@ class EmailSubscriptionManager {
     }
 
     /**
-     * Add subscriber to Brevo via API
+     * Add subscriber to Brevo via Netlify Function (secure server-side)
      */
     async addToBrevo(email, attributes = {}) {
         try {
-            const response = await fetch(`${this.apiEndpoint}/contacts`, {
+            const response = await fetch('/.netlify/functions/subscribe', {
                 method: 'POST',
                 headers: {
-                    'accept': 'application/json',
-                    'api-key': this.apiKey,
-                    'content-type': 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     email: email,
-                    attributes: {
-                        FIRSTNAME: attributes.firstName || '',
-                        LASTNAME: attributes.lastName || '',
-                        SOURCE: 'Website Subscription',
-                        ...attributes
-                    },
-                    listIds: [this.listId],
-                    updateEnabled: false
+                    firstName: attributes.firstName || '',
+                    lastName: attributes.lastName || ''
                 })
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to add subscriber to Brevo');
+                throw new Error(errorData.error || 'Failed to subscribe');
             }
 
             return await response.json();
         } catch (error) {
-            console.error('Brevo API Error:', error);
+            console.error('Subscription Error:', error);
             throw error;
         }
     }
@@ -100,40 +93,13 @@ class EmailSubscriptionManager {
     /**
      * Send welcome email via Brevo
      */
+    /**
+     * Send welcome email - Now handled by Netlify function
+     * This method is kept for backwards compatibility but is no longer used  
+     */
     async sendWelcomeEmail(email, subscriberName = '') {
-        try {
-            const response = await fetch(`${this.apiEndpoint}/smtp/email`, {
-                method: 'POST',
-                headers: {
-                    'accept': 'application/json',
-                    'api-key': this.apiKey,
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sender: {
-                        name: 'Renewable Energy Nexus',
-                        email: 'renewableenergynexus@gmail.com' // Replace with your verified sender
-                    },
-                    to: [{
-                        email: email,
-                        name: subscriberName
-                    }],
-                    subject: 'Welcome to Renewable Energy Nexus! 🌱',
-                    htmlContent: this.getWelcomeEmailTemplate(subscriberName),
-                    textContent: this.getWelcomeEmailText(subscriberName)
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to send welcome email');
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Failed to send welcome email:', error);
-            throw error;
-        }
+        console.log('Note: Welcome email is now sent via Netlify function during subscription');
+        return { success: true };
     }
 
     /**
@@ -164,11 +130,9 @@ class EmailSubscriptionManager {
         };
 
         try {
-            // Add to Brevo (if API key is configured)
-            if (this.apiKey !== 'YOUR_BREVO_API_KEY') {
-                await this.addToBrevo(email, additionalData);
-                await this.sendWelcomeEmail(email, additionalData.firstName);
-            }
+            // Use Netlify function to add to Brevo and send welcome email
+            // (API key is kept secure on the server)
+            await this.addToBrevo(email, additionalData);
 
             // Store locally
             this.subscribers.push(subscriber);
@@ -180,14 +144,16 @@ class EmailSubscriptionManager {
                 subscriber: subscriber
             };
         } catch (error) {
-            // If Brevo fails but we want to store locally anyway
+            console.error('Subscription failed:', error.message);
+            
+            // If subscription fails, still store locally as backup
             this.subscribers.push(subscriber);
             this.saveSubscribers();
 
             return {
-                success: true,
-                message: 'Subscription recorded. Email service temporarily unavailable.',
-                warning: error.message
+                success: false,
+                message: 'Subscription could not be processed: ' + error.message,
+                subscriber: subscriber
             };
         }
     }
@@ -204,20 +170,9 @@ class EmailSubscriptionManager {
             throw new Error('Email not found in subscriber list');
         }
 
-        // Remove from Brevo
-        if (this.apiKey !== 'YOUR_BREVO_API_KEY') {
-            try {
-                await fetch(`${this.apiEndpoint}/contacts/${encodeURIComponent(email)}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'accept': 'application/json',
-                        'api-key': this.apiKey
-                    }
-                });
-            } catch (error) {
-                console.error('Failed to remove from Brevo:', error);
-            }
-        }
+        // Note: Removal from Brevo should be done from the email itself
+        // or from a secure admin interface for security reasons
+        // The frontend cannot safely remove users from Brevo
 
         // Remove locally
         this.subscribers.splice(index, 1);
