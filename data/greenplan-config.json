@@ -1,0 +1,70 @@
+{
+  "assumptions": {
+    "electricityPriceEURPerKWh": 0.34,
+    "feedInTariffEURPerKWh": 0.08,
+    "pvSpecificYieldKWhPerKWp": 980,
+    "co2GridFactorKgPerKWh": 0.38,
+    "opexPctPerYear": 0.012
+  },
+  "costs": {
+    "baseInstallCostEUR": 1200,
+    "pvCostPerKWpEUR": 1450,
+    "batteryCostPerKWhEUR": 760
+  },
+  "factors": {
+    "shadingFactorMap": {
+      "none": 1.0,
+      "low": 0.95,
+      "medium": 0.85,
+      "high": 0.72
+    },
+    "loadAddOnKWh": {
+      "heatPump": 2500,
+      "evCharging": 1800
+    },
+    "baseSelfConsumption": 0.34,
+    "projectTypeSelfConsumptionBonus": 0.12,
+    "heatPumpSelfConsumptionBonus": 0.08,
+    "evSelfConsumptionBonus": 0.07,
+    "selfConsumptionMin": 0.25,
+    "selfConsumptionMax": 0.70
+  },
+  "sizing": {
+    "roofAreaToKWp": 0.2,
+    "minPvKWp": 2.4,
+    "pvFactor": {
+      "budget": 0.62,
+      "roi": 0.84,
+      "green": 1.0
+    },
+    "loadMultiplier": {
+      "default": 1.02,
+      "green": 1.22
+    },
+    "batteryFactor": {
+      "budget": 0.32,
+      "roi": 0.75,
+      "green": 1.08
+    },
+    "batteryCaps": {
+      "default": 12,
+      "green": 16
+    },
+    "budgetCeilingFactor": 1.04,
+    "budgetScaleTargetFactor": 1.02,
+    "capexRange": {
+      "min": 0.93,
+      "max": 1.08
+    },
+    "savingsRange": {
+      "min": 0.90,
+      "max": 1.12
+    }
+  },
+  "weights": {
+    "economics": 0.35,
+    "co2": 0.30,
+    "feasibility": 0.20,
+    "resilience": 0.15
+  }
+}

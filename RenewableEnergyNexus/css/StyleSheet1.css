@@ -660,6 +660,165 @@ footer {
         background: var(--accent);
     }
 
+    /* GreenPlan Chat Section */
+    .greenplan-section {
+        margin: 3rem 0;
+        padding: 2rem;
+        border-radius: 12px;
+        background: linear-gradient(145deg, rgba(12, 36, 54, 0.82), rgba(24, 67, 70, 0.75));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    .greenplan-form {
+        margin-top: 1rem;
+    }
+
+    .greenplan-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .greenplan-grid .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+
+    .greenplan-grid label {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .greenplan-grid input,
+    .greenplan-grid select {
+        padding: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+    }
+
+    .greenplan-submit {
+        margin-top: 1.25rem;
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #0fbf9f, #2f80ed);
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .greenplan-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(47, 128, 237, 0.35);
+    }
+
+    .greenplan-submit:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+    .greenplan-status {
+        margin: 1rem 0 0.5rem;
+        min-height: 1.4rem;
+        font-weight: 500;
+        color: #b9f6ca;
+    }
+
+    .greenplan-status.info {
+        color: #b9f6ca;
+    }
+
+    .greenplan-status.success {
+        color: #8ee6b4;
+    }
+
+    .greenplan-status.warning {
+        color: #ffe082;
+    }
+
+    .greenplan-status.error {
+        color: #ffab91;
+    }
+
+    .greenplan-results {
+        margin-top: 1rem;
+    }
+
+    .greenplan-actions {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .greenplan-download {
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        padding: 0.7rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .greenplan-download:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .greenplan-download:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .greenplan-summary {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.28);
+        border-left: 4px solid #0fbf9f;
+    }
+
+    .greenplan-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1rem;
+    }
+
+    .greenplan-card {
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    .greenplan-card h4 {
+        margin-top: 0;
+        color: var(--accent);
+    }
+
+    .greenplan-card p {
+        margin: 0.35rem 0;
+        font-size: 0.94rem;
+    }
+
+    .greenplan-card.recommended {
+        border: 2px solid #0fbf9f;
+        box-shadow: 0 0 0 1px rgba(15, 191, 159, 0.4), 0 8px 20px rgba(15, 191, 159, 0.25);
+    }
+
+    @media (max-width: 768px) {
+        .greenplan-section {
+            padding: 1.25rem;
+        }
+    }
+
 /* Newsletter Form */
 .newsletter {
     margin: 2rem 0;
@@ -1346,25 +1505,81 @@ footer {
         font-size: 1.1rem;
     }
 
+/* Article Image Container - Modern Frame Design */
+.full-article img[class*="article-image"] {
+    display: block;
+    margin: 2rem auto;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 .article-image-full {
-    width: 100%;
-    height: 600px; /* increased height for more presence */
-    object-fit: contain; /* show full image without cropping */
+    width: 95%;
+    max-width: 800px;
+    height: 450px;
+    object-fit: cover;
     object-position: center;
-    border-radius: 10px;
-    margin: 1.5rem 0;
-    background: rgba(0, 0, 0, 0.3); /* subtle background for letterboxing */
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.5);
+
+    /* Modern frame effect with gradient border */
+    border: 3px solid;
+    border-image: linear-gradient(135deg, #4CAF50, #FFC107) 1;
+
+    /* Enhanced shadow for depth */
+    box-shadow:
+        0 8px 32px rgba(76, 175, 80, 0.2),
+        0 16px 48px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    filter: brightness(0.95) contrast(1.05);
+}
+
+/* Last article image: tighter framing so it does not look zoomed out */
+#germany-energy .article-image-full {
+    height: 400px;
+    object-fit: cover;
+    object-position: center 24%;
+}
+
+/* Hover effect - subtle zoom and enhanced glow */
+.full-article .article-image-full:hover {
+    transform: scale(1.02) translateY(-4px);
+    box-shadow:
+        0 12px 40px rgba(76, 175, 80, 0.35),
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    filter: brightness(1) contrast(1.1);
 }
 
 @media (max-width: 900px) {
     .article-image-full {
-        height: 450px;
+        height: 350px;
+        width: 97%;
+    }
+
+    #germany-energy .article-image-full {
+        height: 340px;
+        object-fit: cover;
+        object-position: center 22%;
     }
 }
 
 @media (max-width: 600px) {
     .article-image-full {
-        height: 350px;
+        height: 280px;
+        width: 100%;
+        border-radius: 12px;
+        border-width: 2px;
+    }
+
+    #germany-energy .article-image-full {
+        height: 280px;
+        object-fit: cover;
+        object-position: center 20%;
+    }
+
+    .full-article .article-image-full:hover {
+        transform: scale(1.01);
     }
 }
 

@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "requestId": "req_20260325_001",
+    "generatedAt": "2026-03-25T10:30:00Z",
+    "locale": "de-DE",
+    "country": "DE",
+    "currency": "EUR",
+    "confidence": "medium",
+    "version": "1.0"
+  },
+  "userInput": {
+    "location": {
+      "postalCode": "50667",
+      "city": "Koeln",
+      "state": "NRW"
+    },
+    "projectType": "residential_single_family",
+    "annualConsumptionKWh": 4500,
+    "availableRoofAreaM2": 55,
+    "availableGroundAreaM2": 0,
+    "shading": "low",
+    "budgetEUR": 18000,
+    "primaryGoal": "cost_reduction",
+    "batteryPreference": "yes",
+    "heatPump": "planned",
+    "evCharging": "planned",
+    "amortizationImportance": 8,
+    "co2Importance": 7,
+    "feedInPreference": "mixed"
+  },
+  "assumptions": {
+    "electricityPriceEURPerKWh": 0.34,
+    "feedInTariffEURPerKWh": 0.08,
+    "pvSpecificYieldKWhPerKWp": 980,
+    "selfConsumptionBasePct": 36,
+    "selfConsumptionWithBatteryPct": 62,
+    "co2GridFactorKgPerKWh": 0.38,
+    "opexPctPerYear": 1.2,
+    "degradationPctPerYear": 0.35,
+    "financing": {
+      "mode": "cash",
+      "interestRatePct": 0.0,
+      "termYears": 0
+    },
+    "incentives": [
+      {
+        "name": "USt 0% auf PV-Komponenten",
+        "applied": true,
+        "impactEUR": 1200
+      }
+    ]
+  },
+  "plans": [
+    {
+      "id": "budget_plan",
+      "label": "Minimal-Budget",
+      "rank": 2,
+      "totalScore": 78.6,
+      "scoreBreakdown": {
+        "economics": 84,
+        "co2": 70,
+        "feasibility": 82,
+        "resilience": 61
+      },
+      "system": {
+        "pvKWp": 5.2,
+        "batteryKWh": 0,
+        "inverterKW": 5,
+        "evReady": false,
+        "heatPumpReady": true
+      },
+      "financials": {
+        "capexEUR": {
+          "min": 9800,
+          "max": 11600
+        },
+        "annualSavingsEUR": {
+          "min": 1210,
+          "max": 1440
+        },
+        "paybackYears": {
+          "min": 7.4,
+          "max": 9.2
+        },
+        "lifetimeNetSavingsEUR": {
+          "min": 15900,
+          "max": 23800
+        }
+      },
+      "impact": {
+        "annualProductionKWh": 5096,
+        "annualCo2SavingsKg": 1260,
+        "selfConsumptionPct": 39,
+        "autarkyPct": 43
+      },
+      "risks": [
+        "Niedrigere Autarkie ohne Speicher",
+        "Abendlast nur teilweise abgedeckt"
+      ],
+      "next7DayAction": "Technische Dachpruefung und 2 Vergleichsangebote einholen"
+    },
+    {
+      "id": "roi_plan",
+      "label": "Beste Rendite",
+      "rank": 1,
+      "totalScore": 84.9,
+      "scoreBreakdown": {
+        "economics": 88,
+        "co2": 79,
+        "feasibility": 80,
+        "resilience": 73
+      },
+      "system": {
+        "pvKWp": 6.8,
+        "batteryKWh": 5.1,
+        "inverterKW": 6,
+        "evReady": true,
+        "heatPumpReady": true
+      },
+      "financials": {
+        "capexEUR": {
+          "min": 15400,
+          "max": 17900
+        },
+        "annualSavingsEUR": {
+          "min": 1860,
+          "max": 2210
+        },
+        "paybackYears": {
+          "min": 7.0,
+          "max": 8.8
+        },
+        "lifetimeNetSavingsEUR": {
+          "min": 26800,
+          "max": 36900
+        }
+      },
+      "impact": {
+        "annualProductionKWh": 6664,
+        "annualCo2SavingsKg": 1910,
+        "selfConsumptionPct": 63,
+        "autarkyPct": 69
+      },
+      "risks": [
+        "Wirtschaftlichkeit haengt an Verbrauchsprofil",
+        "Lieferzeiten einzelner Speicherkomponenten"
+      ],
+      "next7DayAction": "Installateur-Workshop mit Lastprofilanalyse und Speicherfeinplanung"
+    },
+    {
+      "id": "green_plan",
+      "label": "Maximal nachhaltig",
+      "rank": 3,
+      "totalScore": 81.2,
+      "scoreBreakdown": {
+        "economics": 73,
+        "co2": 93,
+        "feasibility": 76,
+        "resilience": 84
+      },
+      "system": {
+        "pvKWp": 8.4,
+        "batteryKWh": 9.6,
+        "inverterKW": 8,
+        "evReady": true,
+        "heatPumpReady": true
+      },
+      "financials": {
+        "capexEUR": {
+          "min": 22100,
+          "max": 25900
+        },
+        "annualSavingsEUR": {
+          "min": 2270,
+          "max": 2680
+        },
+        "paybackYears": {
+          "min": 9.1,
+          "max": 11.4
+        },
+        "lifetimeNetSavingsEUR": {
+          "min": 28100,
+          "max": 41800
+        }
+      },
+      "impact": {
+        "annualProductionKWh": 8232,
+        "annualCo2SavingsKg": 2560,
+        "selfConsumptionPct": 71,
+        "autarkyPct": 82
+      },
+      "risks": [
+        "Hoehere Anfangsinvestition",
+        "Mehr Platzbedarf fuer Speichertechnik"
+      ],
+      "next7DayAction": "Netzanschlussleistung pruefen und Foerderstrategie finalisieren"
+    }
+  ],
+  "selectedRecommendation": {
+    "planId": "roi_plan",
+    "why": [
+      "Beste Balance aus Investition, Einsparung und Umsetzbarkeit",
+      "Passend zu Prioritaet Kosten senken bei gutem CO2-Effekt",
+      "Vorbereitung auf Waermepumpe und E-Mobilitaet enthalten"
+    ]
+  },
+  "comparison": {
+    "bestForBudget": "budget_plan",
+    "bestForROI": "roi_plan",
+    "bestForSustainability": "green_plan"
+  },
+  "nextSteps": [
+    "Anlagendesign vor Ort validieren",
+    "Mindestens zwei EPC-Angebote vergleichen",
+    "Foerder- und Netzthemen verbindlich klaeren",
+    "Entscheidungsvorlage mit CapEx und Risiko freigeben"
+  ],
+  "legal": {
+    "disclaimer": "Erstindikation auf Basis von Nutzerangaben und Standardannahmen. Keine verbindliche Fachplanung oder Finanzberatung.",
+    "dataSources": [
+      "BNetzA veroeffentlichte Marktwerte",
+      "Destatis Strompreis-Trends",
+      "DWD-typische Einstrahlungswerte"
+    ]
+  }
+}

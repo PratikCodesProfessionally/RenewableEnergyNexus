@@ -674,6 +674,124 @@
                 </div>
             </section>
 
+            <section class="greenplan-section" id="greenplan-chat">
+                <div class="section-header">
+                    <h2><i class="fas fa-robot"></i> GreenPlan Copilot</h2>
+                    <p id="greenplan-subtitle">In wenigen Minuten zu drei passenden Energie-Optionen fuer dein Projekt.</p>
+                </div>
+
+                <form id="greenplan-form" class="greenplan-form">
+                    <div class="greenplan-grid">
+                        <div class="form-group">
+                            <label for="gp-language">Sprache / Language</label>
+                            <select id="gp-language" required>
+                                <option value="de" selected>Deutsch</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-location">Standort (PLZ oder Ort)</label>
+                            <input id="gp-location" type="text" required placeholder="z. B. 50667 Koeln">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-project-type">Projekttyp</label>
+                            <select id="gp-project-type" required>
+                                <option value="residential_single_family">Einfamilienhaus</option>
+                                <option value="multi_family">Mehrfamilienhaus</option>
+                                <option value="commercial">Gewerbe</option>
+                                <option value="municipal">Kommune</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-consumption">Jaehrlicher Stromverbrauch (kWh)</label>
+                            <input id="gp-consumption" type="number" min="500" step="100" required placeholder="4500">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-area">Nutzbare Dachflaeche (m2)</label>
+                            <input id="gp-area" type="number" min="5" step="1" required placeholder="55">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-shading">Verschattung</label>
+                            <select id="gp-shading" required>
+                                <option value="none">Keine</option>
+                                <option value="low" selected>Leicht</option>
+                                <option value="medium">Mittel</option>
+                                <option value="high">Stark</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-budget">Budget (EUR)</label>
+                            <input id="gp-budget" type="number" min="3000" step="100" required placeholder="18000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-goal">Primaeres Ziel</label>
+                            <select id="gp-goal" required>
+                                <option value="cost_reduction">Kosten senken</option>
+                                <option value="co2_reduction">CO2 reduzieren</option>
+                                <option value="autarky">Autarkie erhoehen</option>
+                                <option value="security">Versorgungssicherheit</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-battery">Batteriespeicher</label>
+                            <select id="gp-battery" required>
+                                <option value="yes">Ja</option>
+                                <option value="no">Nein</option>
+                                <option value="unsure" selected>Unsicher</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-heatpump">Waermepumpe</label>
+                            <select id="gp-heatpump" required>
+                                <option value="existing">Vorhanden</option>
+                                <option value="planned">Geplant</option>
+                                <option value="no" selected>Nein</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-ev">E-Mobilitaet</label>
+                            <select id="gp-ev" required>
+                                <option value="yes">Ja</option>
+                                <option value="planned">Geplant</option>
+                                <option value="no" selected>Nein</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-amortization">Amortisation wichtig (1-10)</label>
+                            <input id="gp-amortization" type="number" min="1" max="10" step="1" value="7" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gp-co2">CO2-Einsparung wichtig (1-10)</label>
+                            <input id="gp-co2" type="number" min="1" max="10" step="1" value="7" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="greenplan-submit">
+                        <i class="fas fa-wand-magic-sparkles"></i> Empfehlung berechnen
+                    </button>
+                </form>
+
+                <p id="greenplan-status" class="greenplan-status" aria-live="polite"></p>
+                <div id="greenplan-results" class="greenplan-results" aria-live="polite"></div>
+                <div class="greenplan-actions">
+                    <button id="greenplan-download" type="button" class="greenplan-download" disabled>
+                        <i class="fas fa-file-pdf"></i> Bericht als PDF herunterladen
+                    </button>
+                </div>
+            </section>
+
             <!-- Newsletter Section -->
             <section class="newsletter">
                 <h3><i class="fas fa-paper-plane"></i> Stay Updated</h3>
@@ -804,7 +922,9 @@
     </footer>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="RenewableEnergyNexus/js/emailSubscription.js"></script>
+    <script src="RenewableEnergyNexus/js/chatUiTextBlocks.de.js" defer></script>
     <script src="RenewableEnergyNexus/js/script.js" defer></script>  <!-- Add defer attribute -->
 </body>
 
