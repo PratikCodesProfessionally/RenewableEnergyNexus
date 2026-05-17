@@ -1534,6 +1534,23 @@ footer {
     filter: brightness(0.95) contrast(1.05);
 }
 
+/* Figure and caption for article images */
+.article-figure {
+    margin: 1.5rem auto 2rem;
+    text-align: center;
+}
+
+.article-figure .image-credit {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.75);
+}
+
+.article-figure .image-credit a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
 /* Last article image: tighter framing so it does not look zoomed out */
 #germany-energy .article-image-full {
     height: 400px;
