@@ -27,6 +27,9 @@ function initMap() {
 
         const icon = L.divIcon({
             className: 'custom-icon',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -28],
             html: `<div style="background-color:${iconColor}" class="map-marker">
                      <i class="fas fa-${project.type === 'solar' ? 'solar-panel' : 
                                       project.type === 'wind' ? 'wind' : 'atom'}"></i>
@@ -37,6 +40,10 @@ function initMap() {
             .addTo(map)
             .bindPopup(`<b>${project.name}</b><br>Capacity: ${project.capacity}`);
     });
+
+    // Exposed so the presentation viewer can resize the map when the
+    // slide holding it becomes visible.
+    window.map = map;
 }
 
 // Toggle Card Function - called from HTML onclick
@@ -176,19 +183,32 @@ function calculateSavingsDE() {
         return;
     }
 
-    const rates = {
-        solar: { savings: 0.15, co2: 0.8 },
-        wind: { savings: 0.12, co2: 0.7 },
-        hybrid: { savings: 0.18, co2: 0.9 },
-        default: { savings: 0.10, co2: 0.5 }
+    // 2026 German market assumptions, matching GERMANY_SAMPLE_CALCULATIONS.md.
+    const MARKET_2026 = {
+        gridPrice: 0.34,        // EUR per kWh bought from the grid
+        feedInTariff: 0.08,     // EUR per kWh of exported surplus
+        gridCO2: 0.38           // kg CO2 per kWh of grid electricity
     };
 
-    const { savings, co2 } = rates[type] || rates.default;
-    const monthlySavings = kWh * savings;
-    const annualCO2 = kWh * co2 * 12;
+    // "coverage" is the share of household demand the system serves directly;
+    // "surplus" is the extra generation exported, as a share of demand.
+    const systems = {
+        solar: { label: 'Solar PV system', coverage: 0.45, surplus: 0.30 },
+        wind: { label: 'Small wind turbine', coverage: 0.35, surplus: 0.15 },
+        hybrid: { label: 'Hybrid system', coverage: 0.55, surplus: 0.35 },
+        default: { label: 'Renewable system', coverage: 0.30, surplus: 0.10 }
+    };
+
+    const system = systems[type] || systems.default;
+    const selfUse = kWh * system.coverage;
+    const exported = kWh * system.surplus;
+
+    const monthlySavings = (selfUse * MARKET_2026.gridPrice) +
+                           (exported * MARKET_2026.feedInTariff);
+    const annualCO2 = selfUse * MARKET_2026.gridCO2 * 12;
 
     resultsDiv.innerHTML = `
-        <h4>Estimated Savings <span class="co2-badge">CO2 Reduction Calculator</span></h4>
+        <h4>Estimated Savings <span class="co2-badge">2026 German market</span></h4>
         <div class="results-grid">
             <div class="result-item">
                 <p class="result-label">Monthly Savings</p>
@@ -203,6 +223,12 @@ function calculateSavingsDE() {
                 <p class="result-value">${annualCO2.toFixed(0)} kg/year</p>
             </div>
         </div>
+        <p class="result-basis">
+            ${system.label}: covers about ${Math.round(system.coverage * 100)}% of your
+            ${kWh.toLocaleString('en-GB')} kWh at &euro;${MARKET_2026.gridPrice.toFixed(2)}/kWh,
+            plus ${Math.round(system.surplus * 100)}% exported at
+            &euro;${MARKET_2026.feedInTariff.toFixed(2)}/kWh.
+        </p>
     `;
     resultsDiv.classList.add('visible');
 }
