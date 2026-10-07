@@ -43,15 +43,117 @@
     </nav>
 
     <main id="main-content" class="container">
-        <!-- Welcome Section -->
-        <section class="blog-post">
-            <h2>Welcome to Renewable Energy Nexus</h2>
-            <p>Your comprehensive resource for understanding and implementing renewable energy solutions. Explore cutting-edge technologies, calculate potential savings, and discover global renewable projects.</p>
+        <!-- Hero / Welcome Section with 3D Windrad -->
+        <section class="hero" id="home">
+            <div class="hero-copy">
+                <span class="hero-eyebrow"><i class="fas fa-wind"></i> Clean power, explained</span>
+                <h2>Welcome to Renewable Energy Nexus</h2>
+                <p>Your comprehensive resource for understanding and implementing renewable energy solutions. Explore cutting-edge technologies, calculate potential savings, and discover global renewable projects.</p>
 
-            <div class="engagement">
-                <div class="reaction-buttons">
-                    <button onclick="trackReaction('like')"><i class="far fa-thumbs-up"></i> Helpful</button>
-                    <button onclick="trackReaction('share')"><i class="fas fa-share-alt"></i> Share</button>
+                <div class="hero-actions">
+                    <a href="#education" class="hero-btn hero-btn-primary"><i class="fas fa-lightbulb"></i> Explore technologies</a>
+                    <a href="#calculator" class="hero-btn hero-btn-ghost"><i class="fas fa-calculator"></i> Calculate savings</a>
+                </div>
+
+                <div class="engagement">
+                    <div class="reaction-buttons">
+                        <button onclick="trackReaction('like')"><i class="far fa-thumbs-up"></i> Helpful</button>
+                        <button onclick="trackReaction('share')"><i class="fas fa-share-alt"></i> Share</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual-wrap">
+                <div class="hero-visual" data-view-mode="exterior">
+                    <canvas id="windrad-canvas" tabindex="0" role="img" aria-label="Interactive 3D wind turbine. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
+                    <div id="wt-labels" class="wt-labels"></div>
+
+                    <div class="wt-toolbar wt-modes" role="group" aria-label="View mode">
+                        <button type="button" data-mode="exterior" aria-pressed="true"><i class="fas fa-eye"></i><span>Exterior</span></button>
+                        <button type="button" data-mode="inside" aria-pressed="false"><i class="fas fa-x-ray"></i><span>Inside</span></button>
+                        <button type="button" data-mode="exploded" aria-pressed="false"><i class="fas fa-expand-arrows-alt"></i><span>Exploded</span></button>
+                    </div>
+                    <div class="wt-toolbar wt-tools" role="group" aria-label="View controls">
+                        <button type="button" data-zoom="in" title="Zoom in" aria-label="Zoom in"><i class="fas fa-plus"></i></button>
+                        <button type="button" data-zoom="out" title="Zoom out" aria-label="Zoom out"><i class="fas fa-minus"></i></button>
+                        <button type="button" data-action="labels" aria-pressed="true" title="Show or hide labels" aria-label="Show or hide labels"><i class="fas fa-tags"></i></button>
+                        <button type="button" data-action="reset" title="Reset view" aria-label="Reset view"><i class="fas fa-undo"></i></button>
+                        <button type="button" data-action="expand" aria-pressed="false" title="Expand explorer" aria-label="Expand explorer"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <p class="wt-hint"><i class="fas fa-hand-pointer"></i> Drag to rotate · click a part · click, then scroll to zoom</p>
+
+                    <!-- Shown only when WebGL is unavailable -->
+                    <div class="windrad-fallback" aria-hidden="true">
+                        <div class="wf-tower"></div>
+                        <div class="wf-nacelle"></div>
+                        <div class="wf-rotor">
+                            <span class="wf-blade"></span>
+                            <span class="wf-blade"></span>
+                            <span class="wf-blade"></span>
+                            <span class="wf-hub"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <aside id="wt-info" class="wt-info" hidden aria-live="polite">
+                    <button type="button" id="wt-info-close" class="wt-info-close" aria-label="Close details">&times;</button>
+                    <div class="wt-info-head">
+                        <span id="wt-info-num" class="wt-info-num"></span>
+                        <h3 id="wt-info-title"></h3>
+                    </div>
+                    <p id="wt-info-text"></p>
+                    <p id="wt-info-step" class="wt-info-step" hidden></p>
+                </aside>
+            </div>
+
+            <!-- Windrad explorer: live physics, guided tour, component legend -->
+            <div class="wt-panel">
+                <div class="wt-card wt-physics">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-bolt"></i> Live physics</h3>
+                        <span class="wt-spec">2.5 MW · Ø 100 m rotor · 80 m hub</span>
+                    </div>
+                    <label for="wt-wind-slider" class="wt-slider-label">
+                        <span>Mean wind speed at hub</span>
+                        <span><output id="wt-wind-mean" for="wt-wind-slider">8.0</output> m/s</span>
+                    </label>
+                    <input type="range" id="wt-wind-slider" min="0" max="28" step="0.5" value="8">
+                    <div class="wt-scale" aria-hidden="true">
+                        <span style="left:10.7%">cut-in 3</span>
+                        <span style="left:38.2%">rated 10.7</span>
+                        <span style="left:89.3%">cut-out 25</span>
+                    </div>
+                    <div class="wt-output">
+                        <span>Electrical output</span>
+                        <strong id="wt-power">–</strong>
+                    </div>
+                    <div class="wt-meter" aria-hidden="true"><span id="wt-power-bar"></span></div>
+                    <p id="wt-status" class="wt-status"></p>
+                    <dl class="wt-readouts">
+                        <div><dt>Wind now</dt><dd id="wt-wind">–</dd></div>
+                        <div><dt>Rotor speed</dt><dd id="wt-rpm">–</dd></div>
+                        <div><dt>Generator</dt><dd id="wt-gen">–</dd></div>
+                        <div><dt>Power in wind</dt><dd id="wt-avail">–</dd></div>
+                        <div><dt>Coefficient C<sub>p</sub></dt><dd id="wt-cp">–</dd></div>
+                        <div><dt>Blade pitch</dt><dd id="wt-pitch">–</dd></div>
+                    </dl>
+                    <p class="wt-formula">P = ½ · ρ · A · v³ · C<sub>p</sub> · η<br>ρ = 1.225 kg/m³ · A = πR² = 7,854 m² · C<sub>p</sub> ≤ 0.593 (Betz limit)</p>
+                </div>
+
+                <div class="wt-card wt-howto">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-plug"></i> How a Windrad makes electricity</h3>
+                        <button type="button" class="wt-tour-btn" data-action="tour" aria-pressed="false"><i class="fas fa-play"></i><span>Play tour</span></button>
+                    </div>
+                    <ol class="wt-steps"></ol>
+                </div>
+
+                <div class="wt-card wt-legend-card">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-list-ol"></i> Components</h3>
+                        <span class="wt-key"><i class="wt-key-dot wt-key-ext"></i>outside <i class="wt-key-dot wt-key-int"></i>inside</span>
+                    </div>
+                    <ol class="wt-legend"></ol>
                 </div>
             </div>
         </section>
@@ -930,6 +1032,7 @@
     <script src="RenewableEnergyNexus/js/chatUiTextBlocks.de.js" defer></script>
     <script src="RenewableEnergyNexus/js/script.js" defer></script>  <!-- Add defer attribute -->
     <script src="RenewableEnergyNexus/js/presentation.js" defer></script>
+    <script src="RenewableEnergyNexus/js/windTurbine3d.js" defer></script>
 </body>
 
 </html>
