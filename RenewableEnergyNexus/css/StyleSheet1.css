@@ -2814,7 +2814,7 @@ body.deck-open {
         border-color: rgba(76, 175, 80, 0.55);
     }
 
-#windrad-canvas {
+.explorer-canvas {
     position: absolute;
     inset: 0;
     width: 100% !important;
@@ -2826,20 +2826,20 @@ body.deck-open {
     transition: opacity 0.8s ease;
 }
 
-    #windrad-canvas:focus {
+    .explorer-canvas:focus {
         outline: none;
     }
 
-    #windrad-canvas:focus-visible {
+    .explorer-canvas:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: -3px;
     }
 
-.hero-visual.is-ready #windrad-canvas {
+.hero-visual.is-ready .explorer-canvas {
     opacity: 1;
 }
 
-.hero-visual.is-fallback #windrad-canvas,
+.hero-visual.is-fallback .explorer-canvas,
 .hero-visual.is-fallback .wt-toolbar,
 .hero-visual.is-fallback .wt-hint,
 .hero-visual.is-fallback .wt-labels {
@@ -3246,7 +3246,7 @@ body.deck-open {
         font-variant-numeric: tabular-nums;
     }
 
-#wt-wind-slider {
+.wt-range {
     width: 100%;
     margin: 0;
     accent-color: var(--primary);
@@ -3605,5 +3605,287 @@ body.deck-open {
 
     .wt-modes button i {
         display: none;
+    }
+}
+
+/* ==================== */
+/* SOLAR HOME EXPLORER  */
+/* ==================== */
+@media (min-width: 901px) {
+    /* stage on the left, copy on the right */
+    .hero.hero--reverse:not(.is-expanded) {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    }
+
+        .hero.hero--reverse:not(.is-expanded) .hero-visual-wrap {
+            order: -1;
+        }
+}
+
+/* sky colours are set from the sun position by solarHome3d.js */
+.hero-visual.solar-stage {
+    background:
+        radial-gradient(70% 45% at 50% 100%, rgba(76, 175, 80, 0.16), transparent 70%),
+        linear-gradient(180deg, var(--sky-top, #1d4f7a), var(--sky-bottom, #5b93bd));
+}
+
+.sh-clock {
+    position: absolute;
+    top: 58px;
+    left: 10px;
+    z-index: 2;
+    margin: 0;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    background: rgba(10, 16, 26, 0.62);
+    border-radius: 999px;
+    pointer-events: none;
+}
+
+    .sh-clock i {
+        color: var(--accent);
+        margin-right: 0.2rem;
+    }
+
+.hero-visual.is-fallback .sh-clock {
+    display: none;
+}
+
+/* controls */
+.sh-time-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+}
+
+    .sh-time-row .wt-range {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .sh-time-row .wt-tour-btn {
+        flex: 0 0 auto;
+    }
+
+.sh-controls {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.sh-control-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.wt-seg {
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 9px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+    .wt-seg button {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0.45rem 0.4rem;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.78);
+        font: 600 0.75rem/1.2 'Inter', sans-serif;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+        .wt-seg button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .wt-seg button[aria-pressed="true"] {
+            background: var(--primary);
+            color: #0d1a10;
+        }
+
+/* where the solar power goes */
+.sh-split-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+    .sh-split-head strong {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-size: 1.35rem;
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+    }
+
+.sh-split {
+    display: flex;
+    height: 12px;
+    margin: 0.35rem 0 0.45rem;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+    .sh-split span {
+        display: block;
+        height: 100%;
+        width: 0;
+        transition: width 0.3s ease;
+    }
+
+.sh-split-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    margin: 0 0 0.8rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+    .sh-split-key i {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        margin-right: 0.35rem;
+        border-radius: 50%;
+        vertical-align: -1px;
+    }
+
+.sh-c-house { background: #64b5f6; }
+.sh-c-car { background: #66bb6a; }
+.sh-c-batt { background: #9575cd; }
+.sh-c-grid { background: var(--accent); }
+
+.wt-status[data-state="solar"]::before { background: var(--primary); }
+.wt-status[data-state="mixed"]::before,
+.wt-status[data-state="export"]::before { background: var(--accent); }
+.wt-status[data-state="import"]::before { background: #ef5350; }
+.wt-status[data-state="battery"]::before { background: #9575cd; }
+
+.wt-readouts.wt-readouts--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.wt-readouts dd.wt-sub {
+    margin-top: 0.1rem;
+    font-size: 0.66rem;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: normal;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+@media (max-width: 600px) {
+    .wt-readouts.wt-readouts--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* CSS-only house, shown when WebGL is unavailable */
+.solar-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+}
+
+.hero-visual.is-fallback .solar-fallback {
+    display: block;
+}
+
+.sf-sun {
+    position: absolute;
+    top: 12%;
+    left: 14%;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff7d1 0%, #ffd54f 45%, rgba(255, 193, 7, 0) 72%);
+}
+
+.sf-house {
+    position: absolute;
+    left: 18%;
+    bottom: 14%;
+    width: 46%;
+    height: 44%;
+}
+
+.sf-roof {
+    position: absolute;
+    left: -6%;
+    right: -6%;
+    top: 0;
+    height: 48%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    padding: 18% 14% 6%;
+    background: #5b3b33;
+    clip-path: polygon(0 100%, 50% 0, 100% 100%);
+}
+
+    .sf-roof span {
+        background: linear-gradient(160deg, #1e3a6e, #0b1730);
+        border: 1px solid #c9d1da;
+    }
+
+.sf-wall {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 52%;
+    background: #e8e2d6;
+}
+
+.sf-car {
+    position: absolute;
+    right: 10%;
+    bottom: 14%;
+    width: 24%;
+    height: 11%;
+    border-radius: 40% 50% 8px 8px;
+    background: #2f6f8f;
+}
+
+/* solar panel: wide energy-flow card, inputs left and results right */
+.wt-panel.wt-panel--solar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+    .wt-panel--solar .wt-physics {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        gap: 0 1.75rem;
+        align-items: start;
+    }
+
+        .wt-panel--solar .wt-physics .wt-card-head {
+            grid-column: 1 / -1;
+        }
+
+@media (max-width: 700px) {
+    .wt-panel.wt-panel--solar,
+    .wt-panel--solar .wt-physics {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

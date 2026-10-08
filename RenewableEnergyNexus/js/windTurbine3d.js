@@ -370,16 +370,22 @@
         renderHud(operatingPoint(ui.windBase));
     }
 
-    // Three.js is loaded on demand so other scripts never wait on it
+    // Three.js is loaded on demand so other scripts never wait on it.
+    // The promise is shared with the other explorers on the page.
     const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
     function loadThree(onReady) {
         if (typeof window.THREE !== 'undefined') { onReady(); return; }
-        const s = document.createElement('script');
-        s.src = THREE_SRC;
-        s.async = true;
-        s.onload = onReady;
-        s.onerror = showFallback;
-        document.head.appendChild(s);
+        if (!window.__rnThreeLoading) {
+            window.__rnThreeLoading = new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = THREE_SRC;
+                s.async = true;
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+        window.__rnThreeLoading.then(onReady, showFallback);
     }
 
     // Skip the download entirely when WebGL is unavailable
@@ -1293,7 +1299,7 @@
         function updateRunState() { if (visible && !document.hidden) start(); else stop(); }
 
         if ('IntersectionObserver' in window) {
-            new IntersectionObserver((entries) => { visible = entries[0].isIntersecting; updateRunState(); }, { threshold: 0.05 }).observe(stage);
+            new IntersectionObserver((entries) => { visible = entries[entries.length - 1].isIntersecting; /* newest entry wins when several are batched */ updateRunState(); }, { threshold: 0.05 }).observe(stage);
         }
         document.addEventListener('visibilitychange', updateRunState);
         canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); stop(); showFallback(); });

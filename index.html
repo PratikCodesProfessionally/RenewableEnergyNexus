@@ -65,7 +65,7 @@
 
             <div class="hero-visual-wrap">
                 <div class="hero-visual" data-view-mode="exterior">
-                    <canvas id="windrad-canvas" tabindex="0" role="img" aria-label="Interactive 3D wind turbine. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
+                    <canvas id="windrad-canvas" class="explorer-canvas" tabindex="0" role="img" aria-label="Interactive 3D wind turbine. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
                     <div id="wt-labels" class="wt-labels"></div>
 
                     <div class="wt-toolbar wt-modes" role="group" aria-label="View mode">
@@ -117,7 +117,7 @@
                         <span>Mean wind speed at hub</span>
                         <span><output id="wt-wind-mean" for="wt-wind-slider">8.0</output> m/s</span>
                     </label>
-                    <input type="range" id="wt-wind-slider" min="0" max="28" step="0.5" value="8">
+                    <input type="range" id="wt-wind-slider" class="wt-range" min="0" max="28" step="0.5" value="8">
                     <div class="wt-scale" aria-hidden="true">
                         <span style="left:10.7%">cut-in 3</span>
                         <span style="left:38.2%">rated 10.7</span>
@@ -143,6 +143,159 @@
                 <div class="wt-card wt-howto">
                     <div class="wt-card-head">
                         <h3><i class="fas fa-plug"></i> How a Windrad makes electricity</h3>
+                        <button type="button" class="wt-tour-btn" data-action="tour" aria-pressed="false"><i class="fas fa-play"></i><span>Play tour</span></button>
+                    </div>
+                    <ol class="wt-steps"></ol>
+                </div>
+
+                <div class="wt-card wt-legend-card">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-list-ol"></i> Components</h3>
+                        <span class="wt-key"><i class="wt-key-dot wt-key-ext"></i>outside <i class="wt-key-dot wt-key-int"></i>inside</span>
+                    </div>
+                    <ol class="wt-legend"></ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solar home explorer: rooftop PV, home battery, wallbox and electric car -->
+        <section class="hero hero--reverse solar-hero" id="solar-home" aria-labelledby="solar-home-title">
+            <div class="hero-copy">
+                <span class="hero-eyebrow"><i class="fas fa-solar-panel"></i> Solar at home</span>
+                <h2 id="solar-home-title">From rooftop sunshine to driving range</h2>
+                <p>Follow the energy from photons striking the solar cells, through the inverter and home battery, all the way into an electric car. Change the time of day, the season and the clouds, and watch how a real 8.2 kWp system shares out its power.</p>
+
+                <div class="hero-actions">
+                    <a href="#calculator" class="hero-btn hero-btn-primary"><i class="fas fa-calculator"></i> Calculate your savings</a>
+                    <a href="#consultation" class="hero-btn hero-btn-ghost"><i class="fas fa-comments"></i> Get advice</a>
+                </div>
+            </div>
+
+            <div class="hero-visual-wrap">
+                <div class="hero-visual solar-stage" data-view-mode="exterior">
+                    <canvas id="solar-canvas" class="explorer-canvas" tabindex="0" role="img" aria-label="Interactive 3D solar home with an electric car charging. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
+                    <div id="sh-labels" class="wt-labels"></div>
+
+                    <div class="wt-toolbar wt-modes" role="group" aria-label="View mode">
+                        <button type="button" data-mode="exterior" aria-pressed="true"><i class="fas fa-eye"></i><span>Exterior</span></button>
+                        <button type="button" data-mode="inside" aria-pressed="false"><i class="fas fa-x-ray"></i><span>Inside</span></button>
+                        <button type="button" data-mode="exploded" aria-pressed="false"><i class="fas fa-expand-arrows-alt"></i><span>Exploded</span></button>
+                    </div>
+                    <div class="wt-toolbar wt-tools" role="group" aria-label="View controls">
+                        <button type="button" data-zoom="in" title="Zoom in" aria-label="Zoom in"><i class="fas fa-plus"></i></button>
+                        <button type="button" data-zoom="out" title="Zoom out" aria-label="Zoom out"><i class="fas fa-minus"></i></button>
+                        <button type="button" data-action="labels" aria-pressed="true" title="Show or hide labels" aria-label="Show or hide labels"><i class="fas fa-tags"></i></button>
+                        <button type="button" data-action="reset" title="Reset view" aria-label="Reset view"><i class="fas fa-undo"></i></button>
+                        <button type="button" data-action="expand" aria-pressed="false" title="Expand explorer" aria-label="Expand explorer"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <p class="wt-hint"><i class="fas fa-hand-pointer"></i> Drag to rotate · click a part · click, then scroll to zoom</p>
+                    <p class="sh-clock" aria-hidden="true"><i class="fas fa-sun"></i> <span id="sh-clock">13:00</span></p>
+
+                    <!-- Shown only when WebGL is unavailable -->
+                    <div class="solar-fallback" aria-hidden="true">
+                        <div class="sf-sun"></div>
+                        <div class="sf-house">
+                            <div class="sf-roof"><span></span><span></span><span></span><span></span></div>
+                            <div class="sf-wall"></div>
+                        </div>
+                        <div class="sf-car"></div>
+                    </div>
+                </div>
+
+                <aside id="sh-info" class="wt-info" hidden aria-live="polite">
+                    <button type="button" id="sh-info-close" class="wt-info-close" aria-label="Close details">&times;</button>
+                    <div class="wt-info-head">
+                        <span id="sh-info-num" class="wt-info-num"></span>
+                        <h3 id="sh-info-title"></h3>
+                    </div>
+                    <p id="sh-info-text"></p>
+                    <p id="sh-info-step" class="wt-info-step" hidden></p>
+                </aside>
+            </div>
+
+            <div class="wt-panel wt-panel--solar">
+                <div class="wt-card wt-physics">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-bolt"></i> Live energy flow</h3>
+                        <span class="wt-spec">8.2 kWp · 10 kWh battery · 11 kW wallbox</span>
+                    </div>
+
+                    <div class="sh-inputs">
+
+                    <label for="sh-time" class="wt-slider-label">
+                        <span>Time of day (solar time)</span>
+                        <span><output id="sh-time-out" for="sh-time">13:00</output></span>
+                    </label>
+                    <div class="sh-time-row">
+                        <input type="range" id="sh-time" class="wt-range" min="4" max="22" step="0.25" value="13">
+                        <button type="button" class="wt-tour-btn" data-action="play-day" aria-pressed="false"><i class="fas fa-play"></i><span>Play day</span></button>
+                    </div>
+
+                    <div class="sh-controls">
+                        <div class="sh-control">
+                            <span class="sh-control-label" id="sh-season-label">Season</span>
+                            <div class="wt-seg" role="group" aria-labelledby="sh-season-label">
+                                <button type="button" data-season="summer" aria-pressed="true">Summer</button>
+                                <button type="button" data-season="equinox" aria-pressed="false">Equinox</button>
+                                <button type="button" data-season="winter" aria-pressed="false">Winter</button>
+                            </div>
+                        </div>
+                        <div class="sh-control">
+                            <label for="sh-cloud" class="wt-slider-label">
+                                <span>Cloud cover</span>
+                                <span><output id="sh-cloud-out" for="sh-cloud">10</output>%</span>
+                            </label>
+                            <input type="range" id="sh-cloud" class="wt-range" min="0" max="100" step="5" value="10">
+                        </div>
+                        <div class="sh-control">
+                            <span class="sh-control-label" id="sh-charge-label">Car charging</span>
+                            <div class="wt-seg" role="group" aria-labelledby="sh-charge-label">
+                                <button type="button" data-charge="solar" aria-pressed="true">Solar surplus</button>
+                                <button type="button" data-charge="fast" aria-pressed="false">Fast 11 kW</button>
+                                <button type="button" data-charge="off" aria-pressed="false">Off</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
+
+                    <div class="sh-results">
+                    <p id="sh-status" class="wt-status"></p>
+
+                    <div class="sh-split-head">
+                        <span>Where the solar power goes</span>
+                        <strong id="sh-pv-total">–</strong>
+                    </div>
+                    <div class="sh-split" aria-hidden="true">
+                        <span id="sh-split-house" class="sh-c-house"></span>
+                        <span id="sh-split-car" class="sh-c-car"></span>
+                        <span id="sh-split-batt" class="sh-c-batt"></span>
+                        <span id="sh-split-grid" class="sh-c-grid"></span>
+                    </div>
+                    <ul class="sh-split-key">
+                        <li><i class="sh-c-house"></i>Home</li>
+                        <li><i class="sh-c-car"></i>Car</li>
+                        <li><i class="sh-c-batt"></i>Battery</li>
+                        <li><i class="sh-c-grid"></i>Export</li>
+                    </ul>
+
+                    <dl class="wt-readouts wt-readouts--4">
+                        <div><dt>Sun height</dt><dd id="sh-sun">–</dd><dd class="wt-sub" id="sh-sun-sub"></dd></div>
+                        <div><dt>Irradiance</dt><dd id="sh-irr">–</dd><dd class="wt-sub" id="sh-irr-sub"></dd></div>
+                        <div><dt>Solar output</dt><dd id="sh-pv">–</dd><dd class="wt-sub">AC from the inverter</dd></div>
+                        <div><dt>House load</dt><dd id="sh-house">–</dd><dd class="wt-sub">typical profile</dd></div>
+                        <div><dt>Wallbox</dt><dd id="sh-wallbox">–</dd><dd class="wt-sub" id="sh-wallbox-sub"></dd></div>
+                        <div><dt>Home battery</dt><dd id="sh-batt">–</dd><dd class="wt-sub" id="sh-batt-sub"></dd></div>
+                        <div><dt>Grid</dt><dd id="sh-grid">–</dd><dd class="wt-sub" id="sh-grid-sub"></dd></div>
+                        <div><dt>Car battery</dt><dd id="sh-car">–</dd><dd class="wt-sub" id="sh-car-sub"></dd></div>
+                    </dl>
+                    <p class="wt-formula">P = G<sub>POA</sub> · A · η<sub>module</sub> · η<sub>inverter</sub> · PR<br>G<sub>POA</sub> = DNI · cos θ + DHI · (1 + cos β) / 2 · β = 35°, latitude 50° N</p>
+                    </div>
+                </div>
+
+                <div class="wt-card wt-howto">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-car-battery"></i> How sunlight becomes driving range</h3>
                         <button type="button" class="wt-tour-btn" data-action="tour" aria-pressed="false"><i class="fas fa-play"></i><span>Play tour</span></button>
                     </div>
                     <ol class="wt-steps"></ol>
@@ -1033,6 +1186,7 @@
     <script src="RenewableEnergyNexus/js/script.js" defer></script>  <!-- Add defer attribute -->
     <script src="RenewableEnergyNexus/js/presentation.js" defer></script>
     <script src="RenewableEnergyNexus/js/windTurbine3d.js" defer></script>
+    <script src="RenewableEnergyNexus/js/solarHome3d.js" defer></script>
 </body>
 
 </html>
