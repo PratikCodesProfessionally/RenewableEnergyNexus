@@ -1,6 +1,6 @@
 // Service Worker for Renewable Energy Nexus
 // NOTE: network-first to avoid serving stale HTML/CSS during active development.
-const CACHE_NAME = 'renewable-energy-nexus-v7';
+const CACHE_NAME = 'renewable-energy-nexus-v8';
 const PRECACHE_URLS = [
     '/',
     '/index.html',
@@ -10,7 +10,8 @@ const PRECACHE_URLS = [
     '/RenewableEnergyNexus/js/script.js',
     '/RenewableEnergyNexus/js/emailSubscription.js',
     '/RenewableEnergyNexus/js/windTurbine3d.js',
-    '/RenewableEnergyNexus/js/solarHome3d.js'
+    '/RenewableEnergyNexus/js/solarHome3d.js',
+    '/RenewableEnergyNexus/js/hydrogenPlant3d.js'
 ];
 
 self.addEventListener('install', (event) => {

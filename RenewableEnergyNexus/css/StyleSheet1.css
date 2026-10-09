@@ -3866,12 +3866,12 @@ body.deck-open {
     background: #2f6f8f;
 }
 
-/* solar panel: wide energy-flow card, inputs left and results right */
-.wt-panel.wt-panel--solar {
+/* wide physics card (solar and hydrogen): inputs left, results right */
+.wt-panel.wt-panel--wide {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-    .wt-panel--solar .wt-physics {
+    .wt-panel--wide .wt-physics {
         grid-column: 1 / -1;
         display: grid;
         grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -3879,13 +3879,89 @@ body.deck-open {
         align-items: start;
     }
 
-        .wt-panel--solar .wt-physics .wt-card-head {
+        .wt-panel--wide .wt-physics .wt-card-head {
             grid-column: 1 / -1;
         }
 
 @media (max-width: 700px) {
-    .wt-panel.wt-panel--solar,
-    .wt-panel--solar .wt-physics {
+    .wt-panel.wt-panel--wide,
+    .wt-panel--wide .wt-physics {
         grid-template-columns: minmax(0, 1fr);
     }
+}
+
+/* ==================== */
+/* GREEN HYDROGEN       */
+/* ==================== */
+.h2-c-h2 { background: #4fc3f7; }
+.h2-c-heat { background: #ff8a65; }
+.h2-c-bop { background: #90a4ae; }
+
+.sh-inputs .wt-scale {
+    margin-bottom: 0.9rem;
+}
+
+/* CSS-only plant, shown when WebGL is unavailable */
+.h2-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+}
+
+.hero-visual.is-fallback .h2-fallback {
+    display: block;
+}
+
+.hf-turbine {
+    position: absolute;
+    left: 16%;
+    bottom: 22%;
+    width: 8px;
+    height: 46%;
+    background: linear-gradient(90deg, #cfd5dd, #fff 45%, #aeb6c1);
+}
+
+    .hf-turbine span {
+        position: absolute;
+        left: 50%;
+        top: -6px;
+        width: 4px;
+        height: 70px;
+        margin-left: -2px;
+        transform-origin: 50% 6px;
+        background: #f4f6f8;
+        border-radius: 3px;
+        animation: wf-spin-simple 5s linear infinite;
+    }
+
+.hf-hall {
+    position: absolute;
+    left: 38%;
+    bottom: 22%;
+    width: 34%;
+    height: 22%;
+    display: grid;
+    place-items: center;
+    background: #d3d9d6;
+    border-top: 6px solid #8a949c;
+}
+
+    .hf-hall b {
+        font-size: 1.6rem;
+        color: #1d5f8a;
+    }
+
+.hf-tank {
+    position: absolute;
+    right: 10%;
+    bottom: 22%;
+    width: 14%;
+    height: 9%;
+    border-radius: 999px;
+    background: #f2f4f6;
+    box-shadow: 0 -14px 0 #e4e8eb;
+}
+
+@keyframes wf-spin-simple {
+    to { transform: rotate(360deg); }
 }

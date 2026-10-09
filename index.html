@@ -213,7 +213,7 @@
                 </aside>
             </div>
 
-            <div class="wt-panel wt-panel--solar">
+            <div class="wt-panel wt-panel--wide">
                 <div class="wt-card wt-physics">
                     <div class="wt-card-head">
                         <h3><i class="fas fa-bolt"></i> Live energy flow</h3>
@@ -296,6 +296,148 @@
                 <div class="wt-card wt-howto">
                     <div class="wt-card-head">
                         <h3><i class="fas fa-car-battery"></i> How sunlight becomes driving range</h3>
+                        <button type="button" class="wt-tour-btn" data-action="tour" aria-pressed="false"><i class="fas fa-play"></i><span>Play tour</span></button>
+                    </div>
+                    <ol class="wt-steps"></ol>
+                </div>
+
+                <div class="wt-card wt-legend-card">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-list-ol"></i> Components</h3>
+                        <span class="wt-key"><i class="wt-key-dot wt-key-ext"></i>outside <i class="wt-key-dot wt-key-int"></i>inside</span>
+                    </div>
+                    <ol class="wt-legend"></ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Green hydrogen explorer: wind + solar power a PEM electrolysis plant -->
+        <section class="hero h2-hero" id="hydrogen" aria-labelledby="hydrogen-title">
+            <div class="hero-copy">
+                <span class="hero-eyebrow"><i class="fas fa-atom"></i> Green hydrogen</span>
+                <h2 id="hydrogen-title">Splitting water with wind and sunshine</h2>
+                <p>A wind farm and a solar park power a 10 MW PEM electrolyser that splits water into hydrogen and oxygen. Explore the plant from the turbines to the 300-bar storage, look inside a single cell, and see how much hydrogen the weather can make.</p>
+
+                <div class="hero-actions">
+                    <a href="#education" class="hero-btn hero-btn-primary"><i class="fas fa-lightbulb"></i> Learn about hydrogen</a>
+                    <a href="#consultation" class="hero-btn hero-btn-ghost"><i class="fas fa-comments"></i> Get advice</a>
+                </div>
+            </div>
+
+            <div class="hero-visual-wrap">
+                <div class="hero-visual solar-stage h2-stage" data-view-mode="exterior">
+                    <canvas id="h2-canvas" class="explorer-canvas" tabindex="0" role="img" aria-label="Interactive 3D green hydrogen plant powered by wind turbines and a solar park. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
+                    <div id="h2-labels" class="wt-labels"></div>
+
+                    <div class="wt-toolbar wt-modes" role="group" aria-label="View mode">
+                        <button type="button" data-mode="exterior" aria-pressed="true"><i class="fas fa-eye"></i><span>Exterior</span></button>
+                        <button type="button" data-mode="inside" aria-pressed="false"><i class="fas fa-x-ray"></i><span>Inside</span></button>
+                        <button type="button" data-mode="exploded" aria-pressed="false"><i class="fas fa-expand-arrows-alt"></i><span>Exploded</span></button>
+                    </div>
+                    <div class="wt-toolbar wt-tools" role="group" aria-label="View controls">
+                        <button type="button" data-zoom="in" title="Zoom in" aria-label="Zoom in"><i class="fas fa-plus"></i></button>
+                        <button type="button" data-zoom="out" title="Zoom out" aria-label="Zoom out"><i class="fas fa-minus"></i></button>
+                        <button type="button" data-action="labels" aria-pressed="true" title="Show or hide labels" aria-label="Show or hide labels"><i class="fas fa-tags"></i></button>
+                        <button type="button" data-action="reset" title="Reset view" aria-label="Reset view"><i class="fas fa-undo"></i></button>
+                        <button type="button" data-action="expand" aria-pressed="false" title="Expand explorer" aria-label="Expand explorer"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <p class="wt-hint"><i class="fas fa-hand-pointer"></i> Drag to rotate · click a part · click, then scroll to zoom</p>
+
+                    <!-- Shown only when WebGL is unavailable -->
+                    <div class="h2-fallback" aria-hidden="true">
+                        <div class="hf-turbine"><span></span></div>
+                        <div class="hf-hall"><b>H₂</b></div>
+                        <div class="hf-tank"></div>
+                    </div>
+                </div>
+
+                <aside id="h2-info" class="wt-info" hidden aria-live="polite">
+                    <button type="button" id="h2-info-close" class="wt-info-close" aria-label="Close details">&times;</button>
+                    <div class="wt-info-head">
+                        <span id="h2-info-num" class="wt-info-num"></span>
+                        <h3 id="h2-info-title"></h3>
+                    </div>
+                    <p id="h2-info-text"></p>
+                    <p id="h2-info-step" class="wt-info-step" hidden></p>
+                </aside>
+            </div>
+
+            <div class="wt-panel wt-panel--wide">
+                <div class="wt-card wt-physics">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-bolt"></i> Live plant model</h3>
+                        <span class="wt-spec">12.6 MW wind · 10 MWp solar · 10 MW PEM electrolyser</span>
+                    </div>
+
+                    <div class="sh-inputs">
+                        <label for="h2-wind" class="wt-slider-label">
+                            <span>Wind speed at hub</span>
+                            <span><output id="h2-wind-out" for="h2-wind">9.0</output> m/s</span>
+                        </label>
+                        <input type="range" id="h2-wind" class="wt-range" min="0" max="28" step="0.5" value="9">
+                        <div class="wt-scale" aria-hidden="true">
+                            <span style="left:10.7%">cut-in 3</span>
+                            <span style="left:42.9%">rated 12</span>
+                            <span style="left:89.3%">cut-out 25</span>
+                        </div>
+
+                        <label for="h2-sun" class="wt-slider-label">
+                            <span>Sunshine on the panels</span>
+                            <span><output id="h2-sun-out" for="h2-sun">600</output> W/m²</span>
+                        </label>
+                        <input type="range" id="h2-sun" class="wt-range" min="0" max="1000" step="25" value="600">
+                        <div class="wt-scale" aria-hidden="true">
+                            <span style="left:6%">night</span>
+                            <span style="left:30%">overcast</span>
+                            <span style="left:88%">clear noon</span>
+                        </div>
+
+                        <div class="sh-control">
+                            <span class="sh-control-label" id="h2-mode-label">Operating mode</span>
+                            <div class="wt-seg" role="group" aria-labelledby="h2-mode-label">
+                                <button type="button" data-plant="green" aria-pressed="true">Renewables only</button>
+                                <button type="button" data-plant="grid" aria-pressed="false">Grid top-up to 10 MW</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sh-results">
+                        <p id="h2-status" class="wt-status"></p>
+
+                        <div class="sh-split-head">
+                            <span>Where the electricity goes</span>
+                            <strong id="h2-total">–</strong>
+                        </div>
+                        <div class="sh-split" aria-hidden="true">
+                            <span id="h2-split-h2" class="h2-c-h2"></span>
+                            <span id="h2-split-heat" class="h2-c-heat"></span>
+                            <span id="h2-split-bop" class="h2-c-bop"></span>
+                            <span id="h2-split-exp" class="sh-c-grid"></span>
+                        </div>
+                        <ul class="sh-split-key">
+                            <li><i class="h2-c-h2"></i>Hydrogen (LHV)</li>
+                            <li><i class="h2-c-heat"></i>Stack heat</li>
+                            <li><i class="h2-c-bop"></i>Rectifier &amp; plant</li>
+                            <li><i class="sh-c-grid"></i>Export</li>
+                        </ul>
+
+                        <dl class="wt-readouts wt-readouts--4">
+                            <div><dt>Wind farm</dt><dd id="h2-windmw">–</dd><dd class="wt-sub" id="h2-windmw-sub"></dd></div>
+                            <div><dt>Solar park</dt><dd id="h2-solarmw">–</dd><dd class="wt-sub" id="h2-solarmw-sub"></dd></div>
+                            <div><dt>Electrolyser</dt><dd id="h2-el">–</dd><dd class="wt-sub" id="h2-el-sub"></dd></div>
+                            <div><dt>Cell voltage</dt><dd id="h2-cell">–</dd><dd class="wt-sub" id="h2-cell-sub"></dd></div>
+                            <div><dt>Hydrogen</dt><dd id="h2-h2">–</dd><dd class="wt-sub" id="h2-h2-sub"></dd></div>
+                            <div><dt>Efficiency</dt><dd id="h2-eff">–</dd><dd class="wt-sub" id="h2-eff-sub"></dd></div>
+                            <div><dt>Water</dt><dd id="h2-water">–</dd><dd class="wt-sub" id="h2-water-sub"></dd></div>
+                            <div><dt>Storage</dt><dd id="h2-store">–</dd><dd class="wt-sub" id="h2-store-sub"></dd></div>
+                        </dl>
+                        <p class="wt-formula">ṁ<sub>H₂</sub> = N · I · η<sub>F</sub> / (2F) · M<sub>H₂</sub> &nbsp;(Faraday, F = 96,485 C/mol)<br>U<sub>cell</sub> = 1.45 V + 0.25 V·cm²/A · j · η = ṁ · 33.3 kWh/kg / P<sub>in</sub></p>
+                    </div>
+                </div>
+
+                <div class="wt-card wt-howto">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-route"></i> From wind and sun to hydrogen</h3>
                         <button type="button" class="wt-tour-btn" data-action="tour" aria-pressed="false"><i class="fas fa-play"></i><span>Play tour</span></button>
                     </div>
                     <ol class="wt-steps"></ol>
@@ -1187,6 +1329,7 @@
     <script src="RenewableEnergyNexus/js/presentation.js" defer></script>
     <script src="RenewableEnergyNexus/js/windTurbine3d.js" defer></script>
     <script src="RenewableEnergyNexus/js/solarHome3d.js" defer></script>
+    <script src="RenewableEnergyNexus/js/hydrogenPlant3d.js" defer></script>
 </body>
 
 </html>
