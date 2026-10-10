@@ -453,6 +453,182 @@
             </div>
         </section>
 
+        <!-- Himalayan hydropower explorer: run-of-river scheme, hazards and river ecology -->
+        <section class="hero hero--reverse hy-hero" id="himalaya-hydro" aria-labelledby="himalaya-hydro-title">
+            <div class="hero-copy">
+                <span class="hero-eyebrow"><i class="fas fa-mountain"></i> Hydropower in the Himalaya</span>
+                <h2 id="himalaya-hydro-title">Power from mountain rivers, and its price</h2>
+                <p>Follow a glacier-fed river through a weir, a tunnel inside the mountain and a 350 m penstock to the turbines. Then switch to Risks to see why the young, quake-prone Himalaya makes hydropower dangerous, and what diverting a river does to its fish, its banks and the people who live beside it.</p>
+
+                <div class="hero-actions">
+                    <button type="button" class="hero-btn hero-btn-primary" data-action="glof"><i class="fas fa-water"></i> Simulate glacial lake outburst</button>
+                    <a href="#education" class="hero-btn hero-btn-ghost"><i class="fas fa-lightbulb"></i> Learn about hydropower</a>
+                </div>
+            </div>
+
+            <div class="hero-visual-wrap">
+                <div class="hero-visual solar-stage hy-stage" data-view-mode="exterior">
+                    <canvas id="hy-canvas" class="explorer-canvas" tabindex="0" role="img" aria-label="Interactive 3D Himalayan run-of-river hydropower scheme with its hazards and river impacts. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
+                    <div id="hy-labels" class="wt-labels"></div>
+
+                    <div class="wt-toolbar wt-modes" role="group" aria-label="View mode">
+                        <button type="button" data-mode="exterior" aria-pressed="true"><i class="fas fa-eye"></i><span>Exterior</span></button>
+                        <button type="button" data-mode="inside" aria-pressed="false"><i class="fas fa-x-ray"></i><span>Inside</span></button>
+                        <button type="button" data-mode="exploded" aria-pressed="false"><i class="fas fa-expand-arrows-alt"></i><span>Exploded</span></button>
+                        <button type="button" data-mode="risks" aria-pressed="false" class="wt-mode-risk"><i class="fas fa-exclamation-triangle"></i><span>Risks</span></button>
+                    </div>
+                    <div class="wt-toolbar wt-tools" role="group" aria-label="View controls">
+                        <button type="button" data-zoom="in" title="Zoom in" aria-label="Zoom in"><i class="fas fa-plus"></i></button>
+                        <button type="button" data-zoom="out" title="Zoom out" aria-label="Zoom out"><i class="fas fa-minus"></i></button>
+                        <button type="button" data-action="labels" aria-pressed="true" title="Show or hide labels" aria-label="Show or hide labels"><i class="fas fa-tags"></i></button>
+                        <button type="button" data-action="glof" title="Simulate glacial lake outburst" aria-label="Simulate glacial lake outburst"><i class="fas fa-water"></i></button>
+                        <button type="button" data-action="reset" title="Reset view" aria-label="Reset view"><i class="fas fa-undo"></i></button>
+                        <button type="button" data-action="expand" aria-pressed="false" title="Expand explorer" aria-label="Expand explorer"><i class="fas fa-expand"></i></button>
+                    </div>
+                    <p class="wt-hint"><i class="fas fa-hand-pointer"></i> Drag to rotate · click a part · click, then scroll to zoom</p>
+                    <p id="hy-banner" class="hy-banner" role="status" hidden></p>
+
+                    <!-- Shown only when WebGL is unavailable -->
+                    <div class="hy-fallback" aria-hidden="true">
+                        <div class="yf-peak yf-peak-1"></div>
+                        <div class="yf-peak yf-peak-2"></div>
+                        <div class="yf-river"></div>
+                        <div class="yf-dam"></div>
+                    </div>
+                </div>
+
+                <aside id="hy-info" class="wt-info" hidden aria-live="polite">
+                    <button type="button" id="hy-info-close" class="wt-info-close" aria-label="Close details">&times;</button>
+                    <div class="wt-info-head">
+                        <span id="hy-info-num" class="wt-info-num"></span>
+                        <h3 id="hy-info-title"></h3>
+                    </div>
+                    <p id="hy-info-text"></p>
+                    <p id="hy-info-step" class="wt-info-step" hidden></p>
+                </aside>
+            </div>
+
+            <div class="wt-panel wt-panel--wide">
+                <div class="wt-card wt-physics">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-bolt"></i> Live river and plant model</h3>
+                        <span class="wt-spec">90 MW run-of-river · 350 m head · 3 Francis units</span>
+                    </div>
+
+                    <div class="sh-inputs">
+                        <div class="sh-control">
+                            <span class="sh-control-label" id="hy-season-label">Season</span>
+                            <div class="wt-seg" role="group" aria-labelledby="hy-season-label">
+                                <button type="button" data-season="dry" aria-pressed="false">Dry winter</button>
+                                <button type="button" data-season="pre" aria-pressed="true">Pre-monsoon</button>
+                                <button type="button" data-season="monsoon" aria-pressed="false">Monsoon</button>
+                            </div>
+                        </div>
+
+                        <label for="hy-flow" class="wt-slider-label">
+                            <span>River flow at the weir</span>
+                            <span><output id="hy-flow-out" for="hy-flow">45</output> m³/s</span>
+                        </label>
+                        <input type="range" id="hy-flow" class="wt-range" min="4" max="300" step="1" value="45">
+                        <div class="wt-scale" aria-hidden="true">
+                            <span style="left:8%">dry</span>
+                            <span style="left:58%">monsoon</span>
+                            <span style="left:89%">flood</span>
+                        </div>
+
+                        <label for="hy-eflow" class="wt-slider-label">
+                            <span>Environmental flow left in the river</span>
+                            <span><output id="hy-eflow-out" for="hy-eflow">10</output>%</span>
+                        </label>
+                        <input type="range" id="hy-eflow" class="wt-range" min="0" max="60" step="1" value="10">
+                        <div class="wt-scale" aria-hidden="true">
+                            <span style="left:6%">none</span>
+                            <span style="left:30%">typical rules</span>
+                            <span style="left:88%">generous</span>
+                        </div>
+
+                        <div class="sh-control">
+                            <span class="sh-control-label" id="hy-op-label">Operation</span>
+                            <div class="wt-seg" role="group" aria-labelledby="hy-op-label">
+                                <button type="button" data-operation="ror" aria-pressed="true">Run-of-river</button>
+                                <button type="button" data-operation="peaking" aria-pressed="false">Peaking (evening)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sh-results">
+                        <p id="hy-status" class="wt-status"></p>
+
+                        <div class="hy-stress-row">
+                            <span>River ecosystem stress</span>
+                            <div id="hy-stress" class="hy-stress" data-level="1" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                            <strong id="hy-stress-text">–</strong>
+                        </div>
+
+                        <div class="sh-split-head">
+                            <span>Where the river goes</span>
+                            <strong id="hy-total">–</strong>
+                        </div>
+                        <div class="sh-split" aria-hidden="true">
+                            <span id="hy-split-turb" class="hy-c-turb"></span>
+                            <span id="hy-split-eflow" class="hy-c-eflow"></span>
+                            <span id="hy-split-spill" class="hy-c-spill"></span>
+                        </div>
+                        <ul class="sh-split-key">
+                            <li><i class="hy-c-turb"></i>Through the turbines</li>
+                            <li><i class="hy-c-eflow"></i>Environmental flow</li>
+                            <li><i class="hy-c-spill"></i>Spilled over the weir</li>
+                        </ul>
+
+                        <dl class="wt-readouts wt-readouts--4">
+                            <div><dt>River inflow</dt><dd id="hy-inflow">–</dd><dd class="wt-sub" id="hy-inflow-sub"></dd></div>
+                            <div><dt>Turbine flow</dt><dd id="hy-turb">–</dd><dd class="wt-sub" id="hy-turb-sub"></dd></div>
+                            <div><dt>Power</dt><dd id="hy-power">–</dd><dd class="wt-sub" id="hy-power-sub"></dd></div>
+                            <div><dt>Energy</dt><dd id="hy-energy">–</dd><dd class="wt-sub" id="hy-energy-sub"></dd></div>
+                            <div><dt>Bypassed reach</dt><dd id="hy-bypass">–</dd><dd class="wt-sub" id="hy-bypass-sub"></dd></div>
+                            <div><dt>Spill</dt><dd id="hy-spill">–</dd><dd class="wt-sub" id="hy-spill-sub"></dd></div>
+                            <div><dt>Sediment</dt><dd id="hy-sed">–</dd><dd class="wt-sub" id="hy-sed-sub"></dd></div>
+                            <div><dt>Flow swing</dt><dd id="hy-swing">–</dd><dd class="wt-sub" id="hy-swing-sub"></dd></div>
+                        </dl>
+                        <p class="wt-formula">P = ρ · g · Q · H<sub>net</sub> · η<sub>turbine</sub> · η<sub>generator</sub><br>H<sub>net</sub> = 350 m − 18 m · (Q / 30 m³/s)² · units stop above 5 kg/m³ of sediment</p>
+                    </div>
+                </div>
+
+                <div class="wt-card wt-howto">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-route"></i> From glacier to grid</h3>
+                        <button type="button" class="wt-tour-btn" data-action="tour" aria-pressed="false"><i class="fas fa-play"></i><span>Play tour</span></button>
+                    </div>
+                    <ol class="wt-steps"></ol>
+                </div>
+
+                <div class="wt-card wt-legend-card">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-list-ol"></i> Components</h3>
+                        <span class="wt-key"><i class="wt-key-dot wt-key-ext"></i>outside <i class="wt-key-dot wt-key-int"></i>inside</span>
+                    </div>
+                    <ol class="wt-legend"></ol>
+                </div>
+
+                <div class="wt-card hy-risk-card">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Why the Himalaya is a risky place for hydropower</h3>
+                        <button type="button" class="wt-tour-btn hy-glof-btn" data-action="glof"><i class="fas fa-water"></i><span>Simulate glacial lake outburst</span></button>
+                    </div>
+                    <div class="hy-risk-cols">
+                        <div>
+                            <h4><i class="wt-key-dot hy-key-risk"></i> Dangers to the plant</h4>
+                            <ol id="hy-risk-list" class="wt-legend hy-risk-list"></ol>
+                        </div>
+                        <div>
+                            <h4><i class="wt-key-dot hy-key-eco"></i> Harm to the river and its people</h4>
+                            <ol id="hy-eco-list" class="wt-legend hy-risk-list"></ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Features Grid -->
         <section class="features">
             <div class="feature-card" style="--card-color: #4CAF50;">
@@ -1330,6 +1506,7 @@
     <script src="RenewableEnergyNexus/js/windTurbine3d.js" defer></script>
     <script src="RenewableEnergyNexus/js/solarHome3d.js" defer></script>
     <script src="RenewableEnergyNexus/js/hydrogenPlant3d.js" defer></script>
+    <script src="RenewableEnergyNexus/js/hydroHimalaya3d.js" defer></script>
 </body>
 
 </html>

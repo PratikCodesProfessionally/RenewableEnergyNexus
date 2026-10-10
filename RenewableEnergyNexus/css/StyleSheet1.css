@@ -3965,3 +3965,214 @@ body.deck-open {
 @keyframes wf-spin-simple {
     to { transform: rotate(360deg); }
 }
+
+/* ==================== */
+/* HIMALAYAN HYDROPOWER */
+/* ==================== */
+button.hero-btn-primary {
+    border: 0;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+/* four view modes: allow wrapping beside the tools column */
+.wt-modes {
+    flex-wrap: wrap;
+    max-width: calc(100% - 64px);
+}
+
+    .wt-modes button.wt-mode-risk[aria-pressed="true"] {
+        background: #ef5350;
+        color: #fff;
+    }
+
+/* risk (danger to the plant) and eco (harm to river and people) labels */
+.wt-label-risk .wt-pin {
+    background: #ef5350;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.3), 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.wt-label-eco .wt-pin {
+    background: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.wt-label-risk .wt-tag { border-left-color: #ef5350; }
+.wt-label-eco .wt-tag { border-left-color: #ff9800; }
+.wt-label-risk.is-active .wt-tag { background: #ef5350; color: #fff; }
+.wt-label-eco.is-active .wt-tag { background: #ff9800; }
+
+.wt-legend-risk .wt-legend-num { background: #ef5350; color: #fff; }
+.wt-legend-eco .wt-legend-num { background: #ff9800; }
+
+.wt-legend-risk.is-active { border-color: rgba(239, 83, 80, 0.75); background: rgba(239, 83, 80, 0.14); }
+.wt-legend-eco.is-active { border-color: rgba(255, 152, 0, 0.75); background: rgba(255, 152, 0, 0.14); }
+
+.wt-info.is-risk { border-left-color: #ef5350; }
+.wt-info.is-risk .wt-info-num { background: #ef5350; color: #fff; }
+.wt-info.is-eco { border-left-color: #ff9800; }
+.wt-info.is-eco .wt-info-num { background: #ff9800; }
+
+.wt-key-dot.hy-key-risk { background: #ef5350; }
+.wt-key-dot.hy-key-eco { background: #ff9800; }
+
+/* flood banner over the stage */
+.hy-banner {
+    position: absolute;
+    top: 58px;
+    left: 50%;
+    z-index: 3;
+    width: max-content;
+    max-width: calc(100% - 90px);
+    margin: 0;
+    padding: 0.45rem 0.85rem;
+    transform: translateX(-50%);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    color: #fff;
+    background: rgba(183, 28, 28, 0.88);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+    .hy-banner[hidden] {
+        display: none;
+    }
+
+/* river ecosystem stress meter */
+.hy-stress-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 0.8rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+    .hy-stress-row strong {
+        min-width: 4.5rem;
+        color: #fff;
+    }
+
+.hy-stress {
+    display: flex;
+    flex: 1 1 auto;
+    gap: 4px;
+}
+
+    .hy-stress i {
+        flex: 1 1 0;
+        height: 10px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: background 0.3s ease;
+    }
+
+    .hy-stress[data-level] i:nth-child(1) { background: #66bb6a; }
+    .hy-stress[data-level="1"] i:nth-child(2),
+    .hy-stress[data-level="2"] i:nth-child(2),
+    .hy-stress[data-level="3"] i:nth-child(2) { background: #ffd54f; }
+    .hy-stress[data-level="2"] i:nth-child(3),
+    .hy-stress[data-level="3"] i:nth-child(3) { background: #ff9800; }
+    .hy-stress[data-level="3"] i:nth-child(4) { background: #ef5350; }
+
+.hy-c-turb { background: #4fc3f7; }
+.hy-c-eflow { background: #66bb6a; }
+.hy-c-spill { background: #cfd8dc; }
+
+/* risks card spans the panel */
+.hy-risk-card {
+    grid-column: 1 / -1;
+}
+
+.hy-risk-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem 1.5rem;
+}
+
+    .hy-risk-cols h4 {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0 0 0.55rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+.wt-legend.hy-risk-list {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.hy-glof-btn {
+    border-color: rgba(239, 83, 80, 0.6);
+    background: rgba(239, 83, 80, 0.14);
+    color: #ffcdd2;
+}
+
+    .hy-glof-btn:hover {
+        background: #ef5350;
+        color: #fff;
+    }
+
+@media (max-width: 700px) {
+    .hy-risk-cols {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* CSS-only valley, shown when WebGL is unavailable */
+.hy-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+}
+
+.hero-visual.is-fallback .hy-fallback {
+    display: block;
+}
+
+.yf-peak {
+    position: absolute;
+    bottom: 18%;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-color: transparent transparent #6e665e transparent;
+}
+
+    .yf-peak::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -26px;
+        border-style: solid;
+        border-width: 0 26px 30px 26px;
+        border-color: transparent transparent #f2f6fa transparent;
+    }
+
+.yf-peak-1 { left: 8%; border-width: 0 120px 190px 120px; }
+.yf-peak-2 { right: 6%; border-width: 0 100px 150px 100px; }
+
+.yf-river {
+    position: absolute;
+    left: 45%;
+    bottom: 0;
+    width: 10%;
+    height: 22%;
+    background: linear-gradient(180deg, #3f8fc9, #2f6f9f);
+    clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+}
+
+.yf-dam {
+    position: absolute;
+    left: 40%;
+    bottom: 14%;
+    width: 20%;
+    height: 5%;
+    background: #c9c5bd;
+}
