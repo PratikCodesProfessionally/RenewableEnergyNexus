@@ -65,13 +65,14 @@
 
             <div class="hero-visual-wrap">
                 <div class="hero-visual" data-view-mode="exterior">
-                    <canvas id="windrad-canvas" class="explorer-canvas" tabindex="0" role="img" aria-label="Interactive 3D wind turbine. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
+                    <canvas id="windrad-canvas" class="explorer-canvas" tabindex="0" role="img" aria-label="Interactive 3D wind turbine with five models, onshore and offshore sites and the grid connection. Drag to rotate, press plus or minus to zoom, and click a numbered part for details."></canvas>
                     <div id="wt-labels" class="wt-labels"></div>
 
                     <div class="wt-toolbar wt-modes" role="group" aria-label="View mode">
                         <button type="button" data-mode="exterior" aria-pressed="true"><i class="fas fa-eye"></i><span>Exterior</span></button>
                         <button type="button" data-mode="inside" aria-pressed="false"><i class="fas fa-x-ray"></i><span>Inside</span></button>
                         <button type="button" data-mode="exploded" aria-pressed="false"><i class="fas fa-expand-arrows-alt"></i><span>Exploded</span></button>
+                        <button type="button" data-mode="grid" aria-pressed="false"><i class="fas fa-project-diagram"></i><span>Grid link</span></button>
                     </div>
                     <div class="wt-toolbar wt-tools" role="group" aria-label="View controls">
                         <button type="button" data-zoom="in" title="Zoom in" aria-label="Zoom in"><i class="fas fa-plus"></i></button>
@@ -106,43 +107,87 @@
                 </aside>
             </div>
 
-            <!-- Windrad explorer: live physics, guided tour, component legend -->
-            <div class="wt-panel">
+            <!-- Windrad explorer: models, sites, live physics, tour and legend -->
+            <div class="wt-panel wt-panel--wide">
                 <div class="wt-card wt-physics">
                     <div class="wt-card-head">
-                        <h3><i class="fas fa-bolt"></i> Live physics</h3>
-                        <span class="wt-spec">2.5 MW · Ø 100 m rotor · 80 m hub</span>
+                        <h3><i class="fas fa-bolt"></i> Turbine, site and live physics</h3>
+                        <span class="wt-spec" id="wt-spec">4.2 MW geared · Ø 150 m rotor · 120 m hub</span>
                     </div>
-                    <label for="wt-wind-slider" class="wt-slider-label">
-                        <span>Mean wind speed at hub</span>
-                        <span><output id="wt-wind-mean" for="wt-wind-slider">8.0</output> m/s</span>
-                    </label>
-                    <input type="range" id="wt-wind-slider" class="wt-range" min="0" max="28" step="0.5" value="8">
-                    <div class="wt-scale" aria-hidden="true">
-                        <span style="left:10.7%">cut-in 3</span>
-                        <span style="left:38.2%">rated 10.7</span>
-                        <span style="left:89.3%">cut-out 25</span>
+
+                    <div class="sh-inputs">
+                        <div class="sh-control">
+                            <span class="sh-control-label" id="wt-site-label">Site</span>
+                            <div class="wt-seg" role="group" aria-labelledby="wt-site-label">
+                                <button type="button" data-site="onshore" aria-pressed="true"><i class="fas fa-tree"></i> Onshore</button>
+                                <button type="button" data-site="offshore" aria-pressed="false"><i class="fas fa-water"></i> Offshore</button>
+                            </div>
+                        </div>
+
+                        <div class="sh-control">
+                            <span class="sh-control-label" id="wt-model-label">Turbine model</span>
+                            <div class="wd-models" role="group" aria-labelledby="wt-model-label">
+                                <button type="button" data-model="geared" aria-pressed="true"><strong>Geared 3-blade</strong><span>4.2 MW · gearbox + DFIG</span></button>
+                                <button type="button" data-model="direct" aria-pressed="false"><strong>Direct-drive</strong><span>5.5 MW · ring generator</span></button>
+                                <button type="button" data-model="offshore" aria-pressed="false"><strong>Offshore giant</strong><span>15 MW · 236 m rotor</span></button>
+                                <button type="button" data-model="vawt" aria-pressed="false"><strong>Vertical-axis</strong><span>0.5 MW · Darrieus</span></button>
+                                <button type="button" data-model="small" aria-pressed="false"><strong>Small home</strong><span>10 kW · tail vane</span></button>
+                            </div>
+                        </div>
+
+                        <div class="sh-control" data-offshore-only hidden>
+                            <span class="sh-control-label" id="wt-fnd-label">Foundation (water depth)</span>
+                            <div class="wt-seg" role="group" aria-labelledby="wt-fnd-label">
+                                <button type="button" data-foundation="monopile" aria-pressed="true">Monopile · 30 m</button>
+                                <button type="button" data-foundation="jacket" aria-pressed="false">Jacket · 55 m</button>
+                                <button type="button" data-foundation="floating" aria-pressed="false">Floating · deep</button>
+                            </div>
+                        </div>
+
+                        <div class="sh-control" data-offshore-only hidden>
+                            <span class="sh-control-label" id="wt-link-label">Connection to shore</span>
+                            <div class="wt-seg" role="group" aria-labelledby="wt-link-label">
+                                <button type="button" data-link="hvac" aria-pressed="true">HVAC · near shore</button>
+                                <button type="button" data-link="hvdc" aria-pressed="false">HVDC · far offshore</button>
+                            </div>
+                        </div>
+
+                        <label for="wt-wind-slider" class="wt-slider-label">
+                            <span>Wind speed at hub</span>
+                            <span><output id="wt-wind-mean" for="wt-wind-slider">8.0</output> m/s</span>
+                        </label>
+                        <input type="range" id="wt-wind-slider" class="wt-range" min="0" max="30" step="0.5" value="8">
+                        <div class="wt-scale" aria-hidden="true">
+                            <span id="wt-scale-cutin" style="left:10%">cut-in 3</span>
+                            <span id="wt-scale-rated" style="left:32%">rated 9.7</span>
+                            <span id="wt-scale-cutout" style="left:83%">cut-out 25</span>
+                        </div>
                     </div>
-                    <div class="wt-output">
-                        <span>Electrical output</span>
-                        <strong id="wt-power">–</strong>
+
+                    <div class="sh-results">
+                        <div class="wt-output">
+                            <span>Electrical output <small id="wt-rated"></small></span>
+                            <strong id="wt-power">–</strong>
+                        </div>
+                        <div class="wt-meter" aria-hidden="true"><span id="wt-power-bar"></span></div>
+                        <p id="wt-status" class="wt-status"></p>
+                        <dl class="wt-readouts wt-readouts--4">
+                            <div><dt>Wind now</dt><dd id="wt-wind">–</dd><dd class="wt-sub">with gusts</dd></div>
+                            <div><dt>Rotor speed</dt><dd id="wt-rpm">–</dd><dd class="wt-sub" id="wt-rpm-sub"></dd></div>
+                            <div><dt>Generator</dt><dd id="wt-gen">–</dd><dd class="wt-sub" id="wt-gen-sub"></dd></div>
+                            <div><dt>Power in wind</dt><dd id="wt-avail">–</dd><dd class="wt-sub">½·ρ·A·v³</dd></div>
+                            <div><dt>Coefficient C<sub>p</sub></dt><dd id="wt-cp">–</dd><dd class="wt-sub">Betz limit 0.593</dd></div>
+                            <div><dt>Regulation</dt><dd id="wt-pitch">–</dd><dd class="wt-sub" id="wt-pitch-sub"></dd></div>
+                            <div><dt>Capacity factor</dt><dd id="wt-cf">–</dd><dd class="wt-sub" id="wt-cf-sub"></dd></div>
+                            <div><dt>Energy per year</dt><dd id="wt-aep">–</dd><dd class="wt-sub" id="wt-aep-sub"></dd></div>
+                        </dl>
+                        <p class="wt-formula">P = ½ · ρ · A · v³ · C<sub>p</sub> · η &nbsp;·&nbsp; ρ = 1.225 kg/m³ · <span id="wt-formula-area">A = πR²</span><br>Yearly energy: power curve × Rayleigh wind distribution at hub height</p>
                     </div>
-                    <div class="wt-meter" aria-hidden="true"><span id="wt-power-bar"></span></div>
-                    <p id="wt-status" class="wt-status"></p>
-                    <dl class="wt-readouts">
-                        <div><dt>Wind now</dt><dd id="wt-wind">–</dd></div>
-                        <div><dt>Rotor speed</dt><dd id="wt-rpm">–</dd></div>
-                        <div><dt>Generator</dt><dd id="wt-gen">–</dd></div>
-                        <div><dt>Power in wind</dt><dd id="wt-avail">–</dd></div>
-                        <div><dt>Coefficient C<sub>p</sub></dt><dd id="wt-cp">–</dd></div>
-                        <div><dt>Blade pitch</dt><dd id="wt-pitch">–</dd></div>
-                    </dl>
-                    <p class="wt-formula">P = ½ · ρ · A · v³ · C<sub>p</sub> · η<br>ρ = 1.225 kg/m³ · A = πR² = 7,854 m² · C<sub>p</sub> ≤ 0.593 (Betz limit)</p>
                 </div>
 
                 <div class="wt-card wt-howto">
                     <div class="wt-card-head">
-                        <h3><i class="fas fa-plug"></i> How a Windrad makes electricity</h3>
+                        <h3><i class="fas fa-plug"></i> <span>How a Windrad makes electricity</span></h3>
                         <button type="button" class="wt-tour-btn" data-action="tour" aria-pressed="false"><i class="fas fa-play"></i><span>Play tour</span></button>
                     </div>
                     <ol class="wt-steps"></ol>
@@ -150,7 +195,7 @@
 
                 <div class="wt-card wt-legend-card">
                     <div class="wt-card-head">
-                        <h3><i class="fas fa-list-ol"></i> Components</h3>
+                        <h3><i class="fas fa-list-ol"></i> <span>Components</span></h3>
                         <span class="wt-key"><i class="wt-key-dot wt-key-ext"></i>outside <i class="wt-key-dot wt-key-int"></i>inside</span>
                     </div>
                     <ol class="wt-legend"></ol>
