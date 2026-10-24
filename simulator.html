@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenHub Copilot - Renewable Energy Nexus</title>
+    <meta name="description" content="GreenHub Copilot, a free hourly solar simulator for homes: real PVGIS weather, battery, heat pump, electric car, shading and 25-year economics. Runs in your browser.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="RenewableEnergyNexus/css/StyleSheet1.css">
+    <link rel="stylesheet" href="RenewableEnergyNexus/css/pvSimulator.css">
+</head>
+
+<body class="pvs-page">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header>
+        <h1 class="logo-title">Renewable Energy Nexus</h1>
+        <p class="tagline">Exploring the future of sustainable energy</p>
+    </header>
+
+    <nav>
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="articles.html"><i class="fas fa-newspaper"></i> Articles</a>
+        <a href="simulator.html" class="active" aria-current="page"><i class="fas fa-solar-panel"></i> GreenHub Copilot</a>
+        <a href="index.html#education"><i class="fas fa-lightbulb"></i> Education</a>
+        <a href="index.html#calculator"><i class="fas fa-calculator"></i> Calculator</a>
+        <a href="index.html#consultation"><i class="fas fa-comments"></i> Consultation</a>
+        <a href="index.html#contact"><i class="fas fa-envelope"></i> Contact</a>
+    </nav>
+
+    <main id="main-content" class="pvs-root">
+
+        <section class="pvs-intro">
+            <h2>GreenHub Copilot</h2>
+            <p>
+                Your free solar home simulator. Simulate every hour of a year on your own roof, with real satellite weather for your location,
+                then follow the money for 25 years. Free, no sign-up, and it runs in your browser.
+            </p>
+            <ul class="pvs-badges">
+                <li><i class="fas fa-satellite"></i> PVGIS weather data</li>
+                <li><i class="fas fa-clock"></i> 8,760 hours per year</li>
+                <li><i class="fas fa-car-battery"></i> Battery, heat pump and EV</li>
+                <li><i class="fas fa-lock-open"></i> Free and open</li>
+            </ul>
+        </section>
+
+        <div class="pvs-toolbar">
+            <div class="pvs-mode" role="radiogroup" aria-label="Detail level">
+                <button type="button" class="pvs-mode-btn" role="radio" data-mode="simple" aria-checked="true">
+                    <i class="fas fa-house"></i> Simple
+                </button>
+                <button type="button" class="pvs-mode-btn" role="radio" data-mode="expert" aria-checked="false">
+                    <i class="fas fa-sliders"></i> Expert
+                </button>
+            </div>
+            <div class="pvs-actions">
+                <button type="button" id="pvs-share" class="pvs-btn-ghost"><i class="fas fa-link"></i> Copy share link</button>
+                <button type="button" id="pvs-csv" class="pvs-btn-ghost" disabled><i class="fas fa-file-csv"></i> Hourly CSV</button>
+                <button type="button" id="pvs-pdf" class="pvs-btn-ghost" disabled><i class="fas fa-file-pdf"></i> PDF report</button>
+            </div>
+        </div>
+
+        <div class="pvs-layout">
+
+            <!-- ============================== INPUTS ============================== -->
+            <form id="pvs-form" class="pvs-inputs" novalidate>
+
+                <fieldset class="pvs-group">
+                    <legend><i class="fas fa-location-dot"></i> Location</legend>
+                    <div class="pvs-field">
+                        <label for="pvs-search">Find a place</label>
+                        <div class="pvs-inline">
+                            <input id="pvs-search" type="search" placeholder="Town, street or postcode" autocomplete="off">
+                            <button type="button" id="pvs-search-btn" class="pvs-btn-small" aria-label="Search for the place">
+                                <i class="fas fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="pvs-field">
+                        <label for="pvs-preset">Or pick a city</label>
+                        <select id="pvs-preset">
+                            <option value="">Choose…</option>
+                            <option value="52.52,13.40">Berlin</option>
+                            <option value="50.94,6.96" selected>Cologne</option>
+                            <option value="51.23,6.78">Düsseldorf</option>
+                            <option value="50.11,8.68">Frankfurt</option>
+                            <option value="47.99,7.85">Freiburg</option>
+                            <option value="53.55,9.99">Hamburg</option>
+                            <option value="52.37,9.74">Hanover</option>
+                            <option value="51.34,12.37">Leipzig</option>
+                            <option value="48.14,11.58">Munich</option>
+                            <option value="49.45,11.08">Nuremberg</option>
+                            <option value="48.78,9.18">Stuttgart</option>
+                            <option value="48.21,16.37">Vienna</option>
+                            <option value="47.38,8.54">Zurich</option>
+                            <option value="52.37,4.90">Amsterdam</option>
+                            <option value="48.86,2.35">Paris</option>
+                            <option value="40.42,-3.70">Madrid</option>
+                            <option value="41.90,12.50">Rome</option>
+                            <option value="27.72,85.32">Kathmandu</option>
+                        </select>
+                    </div>
+                    <div class="pvs-row">
+                        <div class="pvs-field">
+                            <label for="pvs-lat">Latitude</label>
+                            <input id="pvs-lat" type="number" step="0.01" min="-60" max="70" value="50.94" data-bind="location.lat">
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-lon">Longitude</label>
+                            <input id="pvs-lon" type="number" step="0.01" min="-180" max="180" value="6.96" data-bind="location.lon">
+                        </div>
+                    </div>
+                    <button type="button" id="pvs-geo" class="pvs-btn-ghost pvs-btn-block"><i class="fas fa-crosshairs"></i> Use my location</button>
+                    <p id="pvs-weather-status" class="pvs-hint" aria-live="polite"></p>
+                </fieldset>
+
+                <fieldset class="pvs-group">
+                    <legend><i class="fas fa-solar-panel"></i> Roof and panels</legend>
+
+                    <div class="pvs-simple-roof">
+                        <div class="pvs-field">
+                            <label for="pvs-kwp">System size <output id="pvs-kwp-out" for="pvs-kwp"></output></label>
+                            <input id="pvs-kwp" type="range" min="1" max="30" step="0.1" value="8">
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-orientation">Roof faces</label>
+                            <select id="pvs-orientation">
+                                <option value="180">South</option>
+                                <option value="135">South-east</option>
+                                <option value="225">South-west</option>
+                                <option value="90">East</option>
+                                <option value="270">West</option>
+                                <option value="ew">East and west (split)</option>
+                                <option value="0">North</option>
+                            </select>
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-tilt">Roof pitch <output id="pvs-tilt-out" for="pvs-tilt"></output></label>
+                            <input id="pvs-tilt" type="range" min="0" max="70" step="1" value="35">
+                        </div>
+                        <p id="pvs-roof-note" class="pvs-hint" hidden>
+                            You set a custom roof layout in Expert mode. Change it there, or move these controls to replace it.
+                        </p>
+                    </div>
+
+                    <div class="pvs-expert">
+                        <div class="pvs-field">
+                            <span class="pvs-label">Roof faces (up to 4)</span>
+                            <div id="pvs-arrays" class="pvs-arrays"></div>
+                            <button type="button" id="pvs-add-array" class="pvs-btn-ghost pvs-btn-block"><i class="fas fa-plus"></i> Add a roof face</button>
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-tech">Module model</label>
+                            <select id="pvs-tech" data-bind="module.technology">
+                                <option value="modern">Modern module (PERC / TOPCon)</option>
+                                <option value="pvgis">PVGIS reference (Huld 2011)</option>
+                            </select>
+                        </div>
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-gamma">Temp. coefficient (%/K)</label>
+                                <input id="pvs-gamma" type="number" step="0.01" min="-0.6" max="0" data-bind="module.tempCoeffPctPerK">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-loss">Other losses (%)</label>
+                                <input id="pvs-loss" type="number" step="0.5" min="0" max="40" data-bind="module.systemLossPct">
+                            </div>
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-albedo">Ground albedo</label>
+                            <input id="pvs-albedo" type="number" step="0.05" min="0" max="0.9" data-bind="module.albedo">
+                        </div>
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-inv">Inverter AC (kW)</label>
+                                <input id="pvs-inv" type="number" step="0.1" min="0.5" max="100" placeholder="auto" data-bind="inverter.acKw" data-nullable="true">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-inveff">Inverter efficiency (%)</label>
+                                <input id="pvs-inveff" type="number" step="0.1" min="80" max="99.5" data-bind="inverter.efficiencyPct">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="pvs-group">
+                    <legend><i class="fas fa-car-battery"></i> Battery</legend>
+                    <div class="pvs-field">
+                        <label for="pvs-batt">Capacity <output id="pvs-batt-out" for="pvs-batt"></output></label>
+                        <input id="pvs-batt" type="range" min="0" max="25" step="0.5" value="0" data-bind="battery.capacityKwh">
+                    </div>
+                    <div class="pvs-expert">
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-bpow">Power (kW)</label>
+                                <input id="pvs-bpow" type="number" step="0.1" min="0.5" max="30" placeholder="auto" data-bind="battery.powerKw" data-nullable="true">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-brte">Round trip (%)</label>
+                                <input id="pvs-brte" type="number" step="0.5" min="60" max="100" data-bind="battery.roundTripPct">
+                            </div>
+                        </div>
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-bsoc">Reserve (%)</label>
+                                <input id="pvs-bsoc" type="number" step="1" min="0" max="50" data-bind="battery.minSocPct">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-bfade">Capacity fade (%/yr)</label>
+                                <input id="pvs-bfade" type="number" step="0.1" min="0" max="5" data-bind="battery.fadePctPerYear">
+                            </div>
+                        </div>
+                        <label class="pvs-check"><input type="checkbox" id="pvs-bev" data-bind="battery.chargesEv"> Battery may charge the car</label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="pvs-group">
+                    <legend><i class="fas fa-house-chimney"></i> Household</legend>
+                    <div class="pvs-field">
+                        <label for="pvs-load">Electricity use per year (kWh)</label>
+                        <input id="pvs-load" type="number" step="100" min="500" max="50000" data-bind="household.annualKwh">
+                        <p class="pvs-hint">Without heat pump and car; those are added below. About 1,500 kWh per person is typical.</p>
+                    </div>
+                    <div class="pvs-expert">
+                        <div class="pvs-field">
+                            <label for="pvs-profile">Daily routine</label>
+                            <select id="pvs-profile" data-bind="household.profile">
+                                <option value="h0">Standard household (BDEW H0)</option>
+                                <option value="home">Someone home during the day</option>
+                                <option value="away">Everyone out on weekdays</option>
+                            </select>
+                        </div>
+                        <label class="pvs-check"><input type="checkbox" id="pvs-peaks" data-bind="household.peaks"> Realistic appliance peaks (single home)</label>
+                        <div class="pvs-field">
+                            <label for="pvs-csv-upload">Or upload your own hourly profile</label>
+                            <input id="pvs-csv-upload" type="file" accept=".csv,.txt">
+                            <p id="pvs-csv-status" class="pvs-hint">A CSV with 8,760 hourly values (kWh), e.g. from your smart meter. It is scaled to the yearly total above and stays on your device.</p>
+                            <button type="button" id="pvs-csv-clear" class="pvs-btn-ghost pvs-btn-small" hidden>Remove uploaded profile</button>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="pvs-group">
+                    <legend><i class="fas fa-temperature-arrow-up"></i> Heat pump</legend>
+                    <label class="pvs-switch"><input type="checkbox" id="pvs-hp" data-bind="heatPump.enabled"> I have or plan a heat pump</label>
+                    <div class="pvs-sub" data-show-if="pvs-hp">
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-area">Heated area (m²)</label>
+                                <input id="pvs-area" type="number" step="5" min="30" max="1000" value="140">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-standard">Building</label>
+                                <select id="pvs-standard">
+                                    <option value="40">New build (2016+)</option>
+                                    <option value="80" selected>Renovated</option>
+                                    <option value="130">Partly renovated</option>
+                                    <option value="180">Unrenovated (pre-1978)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p id="pvs-heat-estimate" class="pvs-hint"></p>
+                        <div class="pvs-expert">
+                            <div class="pvs-row">
+                                <div class="pvs-field">
+                                    <label for="pvs-heat">Space heat (kWh/yr)</label>
+                                    <input id="pvs-heat" type="number" step="100" min="0" max="200000" placeholder="from area" data-bind="heatPump.heatDemandKwh">
+                                </div>
+                                <div class="pvs-field">
+                                    <label for="pvs-dhw">Hot water (kWh/yr)</label>
+                                    <input id="pvs-dhw" type="number" step="100" min="0" max="20000" data-bind="heatPump.dhwKwh">
+                                </div>
+                            </div>
+                            <div class="pvs-row">
+                                <div class="pvs-field">
+                                    <label for="pvs-flow">Flow temp. (°C)</label>
+                                    <select id="pvs-flow" data-bind="heatPump.flowTempC" data-type="number">
+                                        <option value="35">35 °C, underfloor</option>
+                                        <option value="45">45 °C, large radiators</option>
+                                        <option value="55">55 °C, radiators</option>
+                                    </select>
+                                </div>
+                                <div class="pvs-field">
+                                    <label for="pvs-carnot">Carnot quality</label>
+                                    <input id="pvs-carnot" type="number" step="0.01" min="0.2" max="0.7" data-bind="heatPump.carnotQuality">
+                                </div>
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-hlimit">Heating limit (°C)</label>
+                                <input id="pvs-hlimit" type="number" step="0.5" min="8" max="20" data-bind="heatPump.heatingLimitC">
+                            </div>
+                            <label class="pvs-check"><input type="checkbox" id="pvs-smartdhw" data-bind="heatPump.smartDhw"> Heat hot water at midday on solar (SG-Ready)</label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="pvs-group">
+                    <legend><i class="fas fa-car"></i> Electric car</legend>
+                    <label class="pvs-switch"><input type="checkbox" id="pvs-ev" data-bind="ev.enabled"> I have or plan an electric car</label>
+                    <div class="pvs-sub" data-show-if="pvs-ev">
+                        <div class="pvs-field">
+                            <label for="pvs-km">Kilometres per year</label>
+                            <input id="pvs-km" type="number" step="500" min="0" max="100000" data-bind="ev.kmPerYear">
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-evmode">Charging</label>
+                            <select id="pvs-evmode" data-bind="ev.mode">
+                                <option value="solar">Solar surplus first, top up at night</option>
+                                <option value="evening">As soon as I get home</option>
+                                <option value="night">Overnight timer</option>
+                            </select>
+                        </div>
+                        <div class="pvs-expert">
+                            <div class="pvs-row">
+                                <div class="pvs-field">
+                                    <label for="pvs-evcons">kWh per 100 km</label>
+                                    <input id="pvs-evcons" type="number" step="0.5" min="8" max="40" data-bind="ev.kwhPer100km">
+                                </div>
+                                <div class="pvs-field">
+                                    <label for="pvs-wallbox">Wallbox (kW)</label>
+                                    <select id="pvs-wallbox" data-bind="ev.wallboxKw" data-type="number">
+                                        <option value="3.7">3.7 kW</option>
+                                        <option value="11">11 kW</option>
+                                        <option value="22">22 kW</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-homedays">Days per week the car is home in daylight</label>
+                                <input id="pvs-homedays" type="number" step="1" min="0" max="7" data-bind="ev.homeDaysPerWeek">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="pvs-group">
+                    <legend><i class="fas fa-euro-sign"></i> Prices and costs</legend>
+                    <div class="pvs-row">
+                        <div class="pvs-field">
+                            <label for="pvs-price">Electricity (ct/kWh)</label>
+                            <input id="pvs-price" type="number" step="0.5" min="0" max="150" data-bind="tariff.importEurPerKwh" data-scale="100">
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-fit">Feed-in (ct/kWh)</label>
+                            <input id="pvs-fit" type="number" step="0.1" min="0" max="50" data-bind="tariff.feedInEurPerKwh" data-scale="100">
+                        </div>
+                    </div>
+                    <div class="pvs-field">
+                        <label for="pvs-capex">Investment (EUR)</label>
+                        <input id="pvs-capex" type="number" step="100" min="0" max="1000000" placeholder="estimated" data-bind="finance.capexOverrideEur" data-nullable="true">
+                        <p id="pvs-capex-hint" class="pvs-hint"></p>
+                    </div>
+                    <div class="pvs-expert">
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-esc">Price rise (%/yr)</label>
+                                <input id="pvs-esc" type="number" step="0.5" min="-5" max="15" data-bind="tariff.escalationPctPerYear">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-fityears">Feed-in years</label>
+                                <input id="pvs-fityears" type="number" step="1" min="0" max="40" data-bind="tariff.feedInYears">
+                            </div>
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-postfit">Feed-in after that (ct/kWh)</label>
+                            <input id="pvs-postfit" type="number" step="0.1" min="0" max="50" data-bind="tariff.postFeedInEurPerKwh" data-scale="100">
+                        </div>
+                        <label class="pvs-check"><input type="checkbox" id="pvs-tou" data-bind="tariff.touEnabled"> Time-of-use tariff</label>
+                        <div class="pvs-sub" data-show-if="pvs-tou">
+                            <div class="pvs-row pvs-row-3">
+                                <div class="pvs-field">
+                                    <label for="pvs-toup">Peak ct/kWh</label>
+                                    <input id="pvs-toup" type="number" step="0.5" min="0" max="150" data-bind="tariff.touPeakEurPerKwh" data-scale="100">
+                                </div>
+                                <div class="pvs-field">
+                                    <label for="pvs-tous">From (h)</label>
+                                    <input id="pvs-tous" type="number" step="1" min="0" max="23" data-bind="tariff.touPeakStart">
+                                </div>
+                                <div class="pvs-field">
+                                    <label for="pvs-toue">To (h)</label>
+                                    <input id="pvs-toue" type="number" step="1" min="0" max="24" data-bind="tariff.touPeakEnd">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-limit">Feed-in limit</label>
+                            <select id="pvs-limit" data-bind="grid.exportLimit">
+                                <option value="none">No limit</option>
+                                <option value="pct60">60 % of kWp (no smart meter, Germany 2025+)</option>
+                                <option value="pct70">70 % of kWp</option>
+                                <option value="zero">Zero export</option>
+                                <option value="custom">Custom (kW)</option>
+                            </select>
+                        </div>
+                        <div class="pvs-field" data-show-if-value="pvs-limit=custom">
+                            <label for="pvs-limitkw">Limit (kW)</label>
+                            <input id="pvs-limitkw" type="number" step="0.1" min="0" max="100" data-bind="grid.exportLimitKw" data-nullable="true">
+                        </div>
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-opex">Running costs (%/yr)</label>
+                                <input id="pvs-opex" type="number" step="0.1" min="0" max="10" data-bind="finance.opexPctPerYear">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-disc">Discount rate (%)</label>
+                                <input id="pvs-disc" type="number" step="0.5" min="0" max="20" data-bind="finance.discountRatePct">
+                            </div>
+                        </div>
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-life">Lifetime (years)</label>
+                                <input id="pvs-life" type="number" step="1" min="10" max="40" data-bind="finance.lifetimeYears">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-deg">Degradation (%/yr)</label>
+                                <input id="pvs-deg" type="number" step="0.05" min="0" max="2" data-bind="finance.pvDegradationPctPerYear">
+                            </div>
+                        </div>
+                        <div class="pvs-row">
+                            <div class="pvs-field">
+                                <label for="pvs-invyear">Inverter swap (year)</label>
+                                <input id="pvs-invyear" type="number" step="1" min="0" max="40" data-bind="finance.inverterReplacementYear">
+                            </div>
+                            <div class="pvs-field">
+                                <label for="pvs-invcost">Swap cost (EUR)</label>
+                                <input id="pvs-invcost" type="number" step="50" min="0" max="50000" placeholder="auto" data-bind="finance.inverterReplacementEur" data-nullable="true">
+                            </div>
+                        </div>
+                        <div class="pvs-field">
+                            <label for="pvs-co2">Grid CO₂ (kg/kWh)</label>
+                            <input id="pvs-co2" type="number" step="0.01" min="0" max="1.5" data-bind="finance.co2KgPerKwh">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="pvs-group pvs-expert">
+                    <legend><i class="fas fa-tree-city"></i> Shading and horizon</legend>
+                    <label class="pvs-check"><input type="checkbox" id="pvs-terrain" data-bind="horizon.useTerrain"> Include hills and mountains (PVGIS terrain)</label>
+                    <p class="pvs-hint">
+                        Drag the points to draw trees, buildings or hills that block your sun. The curves are the sun's path in
+                        June, March/September and December. Arrow keys work too.
+                    </p>
+                    <div class="pvs-horizon">
+                        <canvas id="pvs-horizon-canvas" tabindex="0" aria-label="Horizon editor. Left and right arrows select a direction, up and down raise or lower the obstruction."></canvas>
+                    </div>
+                    <div class="pvs-chips">
+                        <button type="button" class="pvs-chip" data-horizon="clear">Clear</button>
+                        <button type="button" class="pvs-chip" data-horizon="tree-se">Tree to the south-east</button>
+                        <button type="button" class="pvs-chip" data-horizon="house-s">House to the south</button>
+                        <button type="button" class="pvs-chip" data-horizon="valley">Valley</button>
+                    </div>
+                    <p id="pvs-horizon-loss" class="pvs-hint" aria-live="polite"></p>
+                </fieldset>
+
+            </form>
+
+            <!-- ============================== RESULTS ============================== -->
+            <section class="pvs-results" aria-labelledby="pvs-results-title">
+                <h2 id="pvs-results-title" class="pvs-visually-hidden">Results</h2>
+                <div id="pvs-status" class="pvs-status" role="status" aria-live="polite"></div>
+
+                <div id="pvs-output" class="pvs-output" hidden>
+                    <div class="pvs-hero">
+                        <p class="pvs-hero-label">Pays for itself in</p>
+                        <p class="pvs-hero-value"><span id="pvs-payback">–</span></p>
+                        <p id="pvs-hero-sub" class="pvs-hero-sub"></p>
+                    </div>
+
+                    <div id="pvs-tiles" class="pvs-tiles"></div>
+
+                    <article class="pvs-card">
+                        <header class="pvs-card-head">
+                            <div>
+                                <h3>Where your solar power goes</h3>
+                                <p>Each month's production, by what happened to it</p>
+                            </div>
+                            <button type="button" class="pvs-table-toggle" data-target="pvs-chart-solar" aria-pressed="false">Table</button>
+                        </header>
+                        <div id="pvs-chart-solar" class="pvs-chart-host"></div>
+                        <div id="pvs-chart-solar-table" class="pvs-table-host" hidden></div>
+                    </article>
+
+                    <article class="pvs-card">
+                        <header class="pvs-card-head">
+                            <div>
+                                <h3>Where your electricity comes from</h3>
+                                <p>Each month's consumption, including heat pump and car</p>
+                            </div>
+                            <button type="button" class="pvs-table-toggle" data-target="pvs-chart-supply" aria-pressed="false">Table</button>
+                        </header>
+                        <div id="pvs-chart-supply" class="pvs-chart-host"></div>
+                        <div id="pvs-chart-supply-table" class="pvs-table-host" hidden></div>
+                    </article>
+
+                    <article class="pvs-card">
+                        <header class="pvs-card-head">
+                            <div>
+                                <h3>A day up close</h3>
+                                <p id="pvs-day-sub">Production and consumption, hour by hour</p>
+                            </div>
+                            <button type="button" class="pvs-table-toggle" data-target="pvs-chart-day" aria-pressed="false">Table</button>
+                        </header>
+                        <div class="pvs-day-controls">
+                            <label for="pvs-day-kind" class="pvs-visually-hidden">Which day</label>
+                            <select id="pvs-day-kind">
+                                <option value="avg">Average day of</option>
+                                <option value="best">Sunniest day of</option>
+                                <option value="worst">Darkest day of</option>
+                            </select>
+                            <label for="pvs-day-month" class="pvs-visually-hidden">Month</label>
+                            <select id="pvs-day-month"></select>
+                        </div>
+                        <div id="pvs-chart-day" class="pvs-chart-host"></div>
+                        <div id="pvs-chart-soc-wrap">
+                            <p class="pvs-subchart-title">Battery charge</p>
+                            <div id="pvs-chart-soc" class="pvs-chart-host"></div>
+                        </div>
+                        <div id="pvs-chart-day-table" class="pvs-table-host" hidden></div>
+                    </article>
+
+                    <article class="pvs-card">
+                        <header class="pvs-card-head">
+                            <div>
+                                <h3>Money over time</h3>
+                                <p id="pvs-cash-sub">Cumulative cash position, starting with the investment</p>
+                            </div>
+                            <button type="button" class="pvs-table-toggle" data-target="pvs-chart-cash" aria-pressed="false">Table</button>
+                        </header>
+                        <div id="pvs-chart-cash" class="pvs-chart-host"></div>
+                        <div id="pvs-chart-cash-table" class="pvs-table-host" hidden></div>
+                    </article>
+
+                    <article class="pvs-card pvs-expert">
+                        <header class="pvs-card-head">
+                            <div>
+                                <h3>Every hour of the year</h3>
+                                <p>Solar output by day (across) and local time (down)</p>
+                            </div>
+                        </header>
+                        <div id="pvs-chart-carpet" class="pvs-chart-host"></div>
+                    </article>
+
+                    <article class="pvs-card pvs-expert">
+                        <header class="pvs-card-head">
+                            <div>
+                                <h3>From sunlight to socket</h3>
+                                <p>Year-one energy chain and where it is lost</p>
+                            </div>
+                        </header>
+                        <div id="pvs-losses" class="pvs-table-host"></div>
+                    </article>
+
+                    <article class="pvs-card">
+                        <header class="pvs-card-head">
+                            <div>
+                                <h3>Compare scenarios</h3>
+                                <p>Save what you see, change something, save again. Up to four side by side.</p>
+                            </div>
+                        </header>
+                        <div class="pvs-inline">
+                            <label for="pvs-scenario-name" class="pvs-visually-hidden">Scenario name</label>
+                            <input id="pvs-scenario-name" type="text" maxlength="40" placeholder="Name, e.g. 10 kWp with battery">
+                            <button type="button" id="pvs-scenario-save" class="pvs-btn-small"><i class="fas fa-bookmark"></i> Save</button>
+                        </div>
+                        <ul id="pvs-scenarios" class="pvs-scenarios"></ul>
+                        <div id="pvs-compare" hidden>
+                            <div id="pvs-compare-chart" class="pvs-chart-host"></div>
+                            <div id="pvs-compare-table" class="pvs-table-host"></div>
+                        </div>
+                    </article>
+
+                    <details class="pvs-card pvs-method">
+                        <summary><i class="fas fa-flask"></i> How this is calculated</summary>
+                        <div id="pvs-method-body"></div>
+                    </details>
+                </div>
+            </section>
+        </div>
+
+        <p class="pvs-disclaimer">
+            GreenHub Copilot gives an informed first estimate, not a binding plan or financial advice. Have an installer
+            check your roof, grid connection and subsidies before you buy. Weather data:
+            <a href="https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en" target="_blank" rel="noopener noreferrer">PVGIS</a>
+            &copy; European Union. Place search:
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">&copy; OpenStreetMap contributors</a>.
+        </p>
+    </main>
+
+    <footer id="contact">
+        <div class="contact-info">
+            <h3><i class="fas fa-envelope"></i> Get In Touch</h3>
+            <p>
+                <a href="mailto:renewableenergynexus@gmail.com" class="email-link">
+                    <i class="fas fa-envelope"></i> renewableenergynexus@gmail.com
+                </a>
+            </p>
+        </div>
+        <div class="social-links">
+            <a href="https://www.instagram.com/renex_us/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p>&copy; 2025 Renewable Energy Nexus. All rights reserved.</p>
+        <p class="photo-credit">
+            Background photo by <a href="https://pixabay.com/users/oimheidi-1660138/" target="_blank" rel="noopener noreferrer">oimheidi</a> on <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer">Pixabay</a>
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="RenewableEnergyNexus/js/pvSimEngine.js" defer></script>
+    <script src="RenewableEnergyNexus/js/pvSimCharts.js" defer></script>
+    <script src="RenewableEnergyNexus/js/pvSimUi.js" defer></script>
+    <script src="RenewableEnergyNexus/js/script.js" defer></script>
+</body>
+</html>
