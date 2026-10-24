@@ -8,6 +8,210 @@
 const fs = require('fs/promises');
 const path = require('path');
 
+/* ------------------------------------------------------------------ *
+ * Report language. Every string that reaches the user is looked up    *
+ * here, so a generated report is entirely in the requested language.  *
+ * English is the source language and the fallback.                    *
+ * ------------------------------------------------------------------ */
+
+const SUPPORTED_LANGUAGES = ['en', 'de', 'fr', 'es'];
+
+const REPORT_TEXT = {
+    en: {
+        locale: 'en-US',
+        planLabels: {
+            budget: 'Entry-level budget',
+            roi: 'Best return',
+            green: 'Maximum sustainability'
+        },
+        risks: {
+            budgetExceeded: 'The budget is likely to be exceeded.',
+            budgetRealistic: 'The budget looks realistic.',
+            shadingHigh: 'Heavy shading reduces the yield noticeably.',
+            shadingModerate: 'Shading has only a moderate effect.',
+            lowerAutarky: 'Lower self-sufficiency during the evening load profile.',
+            loadProfileDependency: 'Depends on the load profile and on shifting demand.'
+        },
+        nextAction: {
+            budget: 'Check the roof and request two comparison quotes.',
+            roi: 'Validate the load profile with the installer and fine-tune the components.',
+            green: 'Verify the grid connection capacity and the storage location.'
+        },
+        reasons: {
+            base: 'Selected based on your priorities for economics, CO2, feasibility and resilience.',
+            goalPrefix: 'Primary goal',
+            budget_plan: 'Lowest capital requirement with a clear entry path.',
+            roi_plan: 'Best balance between upfront cost and savings potential.',
+            green_plan: 'Highest impact on CO2 reduction and self-sufficiency.'
+        },
+        goals: {
+            cost_reduction: 'reduce costs',
+            co2_reduction: 'reduce CO2',
+            autarky: 'increase self-sufficiency',
+            security: 'improve energy security'
+        },
+        nextSteps: [
+            'Schedule a technical pre-check with an installer.',
+            'Compare at least two quotes with identical specifications.',
+            'Confirm the grid connection and any subsidies in writing.',
+            'Approve the investment decision with a risk buffer.'
+        ],
+        disclaimer: 'Initial indication based on your input and standard assumptions. Not binding technical planning or financial advice.',
+        dataSources: [
+            'BNetzA published market values',
+            'Destatis electricity price trends',
+            'DWD typical solar irradiation values'
+        ]
+    },
+    de: {
+        locale: 'de-DE',
+        planLabels: {
+            budget: 'Minimal-Budget',
+            roi: 'Beste Rendite',
+            green: 'Maximal nachhaltig'
+        },
+        risks: {
+            budgetExceeded: 'Der Budgetrahmen wird voraussichtlich \u00fcberschritten.',
+            budgetRealistic: 'Der Budgetrahmen ist realistisch erreichbar.',
+            shadingHigh: 'Starke Verschattung reduziert den Ertrag deutlich.',
+            shadingModerate: 'Die Verschattung wirkt sich nur moderat aus.',
+            lowerAutarky: 'Niedrigere Autarkie im Abendprofil.',
+            loadProfileDependency: 'Abh\u00e4ngig von Lastprofil und Lastverschiebung.'
+        },
+        nextAction: {
+            budget: 'Dachpr\u00fcfung durchf\u00fchren und zwei Vergleichsangebote einholen.',
+            roi: 'Lastprofil mit dem Installateur validieren und Komponenten fein auslegen.',
+            green: 'Netzanschlussleistung und Speicherstandort verbindlich pr\u00fcfen.'
+        },
+        reasons: {
+            base: 'Auswahl nach Priorit\u00e4ten f\u00fcr Wirtschaftlichkeit, CO2, Umsetzbarkeit und Resilienz.',
+            goalPrefix: 'Prim\u00e4res Ziel',
+            budget_plan: 'Niedrigster Kapitaleinsatz mit sauberem Einstiegspfad.',
+            roi_plan: 'Beste Balance zwischen Investitionsh\u00f6he und Einsparpotenzial.',
+            green_plan: 'H\u00f6chste Wirkung bei CO2-Reduktion und Autarkiegrad.'
+        },
+        goals: {
+            cost_reduction: 'Kosten senken',
+            co2_reduction: 'CO2 reduzieren',
+            autarky: 'Autarkie erh\u00f6hen',
+            security: 'Versorgungssicherheit'
+        },
+        nextSteps: [
+            'Technische Vorpr\u00fcfung mit einem Installateur terminieren.',
+            'Mindestens zwei Angebote mit identischer Spezifikation vergleichen.',
+            'Netzanschluss und F\u00f6rderung verbindlich best\u00e4tigen.',
+            'Investitionsentscheidung mit Risikopuffer freigeben.'
+        ],
+        disclaimer: 'Erstindikation auf Basis deiner Angaben und Standardannahmen. Keine verbindliche Fachplanung oder Finanzberatung.',
+        dataSources: [
+            'BNetzA ver\u00f6ffentlichte Marktwerte',
+            'Destatis Strompreis-Trends',
+            'DWD-typische Einstrahlungswerte'
+        ]
+    },
+    fr: {
+        locale: 'fr-FR',
+        planLabels: {
+            budget: "Budget d'entr\u00e9e",
+            roi: 'Meilleur rendement',
+            green: 'Durabilit\u00e9 maximale'
+        },
+        risks: {
+            budgetExceeded: 'Le budget sera probablement d\u00e9pass\u00e9.',
+            budgetRealistic: 'Le budget semble r\u00e9aliste.',
+            shadingHigh: 'Un ombrage important r\u00e9duit nettement le rendement.',
+            shadingModerate: "L'ombrage n'a qu'un effet mod\u00e9r\u00e9.",
+            lowerAutarky: 'Autoconsommation plus faible sur le profil de charge du soir.',
+            loadProfileDependency: 'D\u00e9pend du profil de charge et du report de consommation.'
+        },
+        nextAction: {
+            budget: 'Faire v\u00e9rifier la toiture et demander deux devis comparatifs.',
+            roi: "Valider le profil de charge avec l'installateur et affiner le dimensionnement.",
+            green: "V\u00e9rifier la puissance de raccordement au r\u00e9seau et l'emplacement du stockage."
+        },
+        reasons: {
+            base: 'S\u00e9lection fond\u00e9e sur vos priorit\u00e9s de rentabilit\u00e9, de CO2, de faisabilit\u00e9 et de r\u00e9silience.',
+            goalPrefix: 'Objectif principal',
+            budget_plan: "Investissement initial le plus faible, avec un parcours d'entr\u00e9e clair.",
+            roi_plan: "Meilleur \u00e9quilibre entre co\u00fbt initial et potentiel d'\u00e9conomies.",
+            green_plan: "Impact le plus fort sur la r\u00e9duction du CO2 et l'autoconsommation."
+        },
+        goals: {
+            cost_reduction: 'r\u00e9duire les co\u00fbts',
+            co2_reduction: 'r\u00e9duire le CO2',
+            autarky: "augmenter l'autoconsommation",
+            security: "renforcer la s\u00e9curit\u00e9 d'approvisionnement"
+        },
+        nextSteps: [
+            "Planifier une pr\u00e9-\u00e9tude technique avec un installateur.",
+            'Comparer au moins deux devis \u00e0 sp\u00e9cifications identiques.',
+            'Confirmer par \u00e9crit le raccordement au r\u00e9seau et les aides.',
+            "Valider la d\u00e9cision d'investissement avec une marge de s\u00e9curit\u00e9."
+        ],
+        disclaimer: "Premi\u00e8re estimation fond\u00e9e sur vos donn\u00e9es et sur des hypoth\u00e8ses standard. Il ne s'agit ni d'une \u00e9tude technique contractuelle ni d'un conseil financier.",
+        dataSources: [
+            'Valeurs de march\u00e9 publi\u00e9es par la BNetzA',
+            "Tendances des prix de l'\u00e9lectricit\u00e9 (Destatis)",
+            "Valeurs d'ensoleillement typiques du DWD"
+        ]
+    },
+    es: {
+        locale: 'es-ES',
+        planLabels: {
+            budget: 'Presupuesto de entrada',
+            roi: 'Mejor rentabilidad',
+            green: 'M\u00e1xima sostenibilidad'
+        },
+        risks: {
+            budgetExceeded: 'Es probable que se supere el presupuesto.',
+            budgetRealistic: 'El presupuesto parece realista.',
+            shadingHigh: 'Un sombreado fuerte reduce notablemente el rendimiento.',
+            shadingModerate: 'El sombreado solo tiene un efecto moderado.',
+            lowerAutarky: 'Menor autoconsumo en el perfil de carga de la tarde.',
+            loadProfileDependency: 'Depende del perfil de carga y del desplazamiento del consumo.'
+        },
+        nextAction: {
+            budget: 'Revisar el tejado y pedir dos presupuestos comparables.',
+            roi: 'Validar el perfil de carga con el instalador y ajustar los componentes.',
+            green: 'Comprobar la potencia de conexi\u00f3n a la red y la ubicaci\u00f3n del almacenamiento.'
+        },
+        reasons: {
+            base: 'Selecci\u00f3n basada en tus prioridades de rentabilidad, CO2, viabilidad y resiliencia.',
+            goalPrefix: 'Objetivo principal',
+            budget_plan: 'Menor inversi\u00f3n inicial, con una v\u00eda de entrada clara.',
+            roi_plan: 'Mejor equilibrio entre coste inicial y potencial de ahorro.',
+            green_plan: 'Mayor impacto en la reducci\u00f3n de CO2 y en el autoconsumo.'
+        },
+        goals: {
+            cost_reduction: 'reducir costes',
+            co2_reduction: 'reducir CO2',
+            autarky: 'aumentar el autoconsumo',
+            security: 'mejorar la seguridad de suministro'
+        },
+        nextSteps: [
+            'Concertar una revisi\u00f3n t\u00e9cnica previa con un instalador.',
+            'Comparar al menos dos presupuestos con especificaciones id\u00e9nticas.',
+            'Confirmar por escrito la conexi\u00f3n a la red y las ayudas.',
+            'Aprobar la decisi\u00f3n de inversi\u00f3n con un margen de riesgo.'
+        ],
+        disclaimer: 'Indicaci\u00f3n inicial basada en tus datos y en supuestos est\u00e1ndar. No constituye un proyecto t\u00e9cnico vinculante ni asesoramiento financiero.',
+        dataSources: [
+            'Valores de mercado publicados por la BNetzA',
+            'Tendencias de precios de la electricidad (Destatis)',
+            'Valores de irradiaci\u00f3n t\u00edpicos del DWD'
+        ]
+    }
+};
+
+function normalizeLanguage(rawLanguage) {
+    const lang = String(rawLanguage || '').slice(0, 2).toLowerCase();
+    return SUPPORTED_LANGUAGES.includes(lang) ? lang : 'en';
+}
+
+function getReportText(language) {
+    return REPORT_TEXT[language] || REPORT_TEXT.en;
+}
+
 function jsonResponse(statusCode, body) {
     return {
         statusCode,
@@ -211,6 +415,7 @@ function normalizeInput(rawInput = {}) {
         : 'residential_single_family';
 
     return {
+        language: normalizeLanguage(rawInput.language),
         location: rawInput.location || {
             postalCode: '50667',
             city: 'Koeln',
@@ -277,6 +482,7 @@ function getWeights(input, config) {
 }
 
 function buildPlan(mode, input, config, profile) {
+    const text = getReportText(input.language);
     const roofLimitKWp = input.availableRoofAreaM2 * config.sizing.roofAreaToKWp;
     const loadBasedKWp = profile.adjustedLoadKWh / config.assumptions.pvSpecificYieldKWhPerKWp;
 
@@ -353,7 +559,7 @@ function buildPlan(mode, input, config, profile) {
 
     return {
         id: mode === 'budget' ? 'budget_plan' : mode === 'roi' ? 'roi_plan' : 'green_plan',
-        label: mode === 'budget' ? 'Minimal-Budget' : mode === 'roi' ? 'Beste Rendite' : 'Maximal nachhaltig',
+        label: text.planLabels[mode],
         system: {
             pvKWp: round(pvKWp, 1),
             batteryKWh: round(batteryKWh, 1),
@@ -392,15 +598,11 @@ function buildPlan(mode, input, config, profile) {
             resilience: Math.round(resilience)
         },
         risks: [
-            capex > input.budgetEUR ? 'Budgetrahmen wird voraussichtlich ueberschritten' : 'Budgetrahmen realistisch erreichbar',
-            input.shading === 'high' ? 'Starke Verschattung reduziert den Ertrag deutlich' : 'Verschattung nur mit moderater Auswirkung',
-            mode === 'budget' ? 'Niedrigere Autarkie im Abendprofil' : 'Abhaengigkeit von Lastprofil und Lastverschiebung'
+            capex > input.budgetEUR ? text.risks.budgetExceeded : text.risks.budgetRealistic,
+            input.shading === 'high' ? text.risks.shadingHigh : text.risks.shadingModerate,
+            mode === 'budget' ? text.risks.lowerAutarky : text.risks.loadProfileDependency
         ],
-        next7DayAction: mode === 'green'
-            ? 'Netzanschlussleistung und Speicherstandort verbindlich pruefen'
-            : mode === 'roi'
-                ? 'Lastprofil mit Installateur validieren und Komponenten fein auslegen'
-                : 'Dachpruefung und zwei Vergleichsangebote einholen'
+        next7DayAction: text.nextAction[mode]
     };
 }
 
@@ -424,20 +626,16 @@ function scoreAndRank(plans, weights) {
 }
 
 function buildRecommendationReason(input, selectedPlan) {
+    const text = getReportText(input.language);
+    const goalLabel = text.goals[input.primaryGoal] || String(input.primaryGoal).replace(/_/g, ' ');
+
     const reasons = [
-        'Auswahl nach Prioritaeten fuer Wirtschaftlichkeit, CO2, Umsetzbarkeit und Resilienz',
-        `Primaeres Ziel: ${input.primaryGoal.replace('_', ' ')}`
+        text.reasons.base,
+        `${text.reasons.goalPrefix}: ${goalLabel}`
     ];
 
-    if (selectedPlan.id === 'roi_plan') {
-        reasons.push('Beste Balance zwischen Investitionshoehe und Einsparpotenzial');
-    }
-    if (selectedPlan.id === 'green_plan') {
-        reasons.push('Hoechste Wirkung bei CO2-Reduktion und Autarkiegrad');
-    }
-    if (selectedPlan.id === 'budget_plan') {
-        reasons.push('Niedrigster Kapitaleinsatz mit sauberem Einstiegspfad');
-    }
+    const planReason = text.reasons[selectedPlan.id];
+    if (planReason) reasons.push(planReason);
 
     return reasons;
 }
@@ -471,11 +669,14 @@ exports.handler = async (event) => {
         const rankedPlans = scoreAndRank(plans, weights);
         const selectedPlan = rankedPlans[0];
 
+        const text = getReportText(userInput.language);
+
         const responseBody = {
             meta: {
                 requestId: buildRequestId(),
                 generatedAt: new Date().toISOString(),
-                locale: 'de-DE',
+                language: userInput.language,
+                locale: text.locale,
                 country: 'DE',
                 currency: 'EUR',
                 confidence: 'medium',
@@ -506,19 +707,10 @@ exports.handler = async (event) => {
                 bestForROI: 'roi_plan',
                 bestForSustainability: 'green_plan'
             },
-            nextSteps: [
-                'Technische Vorpruefung mit Installateur terminieren',
-                'Mindestens zwei Angebote mit identischer Spezifikation vergleichen',
-                'Netzanschluss und Foerderung verbindlich bestaetigen',
-                'Investitionsentscheidung mit Risikopuffer freigeben'
-            ],
+            nextSteps: text.nextSteps,
             legal: {
-                disclaimer: 'Erstindikation auf Basis von Nutzerangaben und Standardannahmen. Keine verbindliche Fachplanung oder Finanzberatung.',
-                dataSources: [
-                    'BNetzA veroeffentlichte Marktwerte',
-                    'Destatis Strompreis-Trends',
-                    'DWD-typische Einstrahlungswerte'
-                ]
+                disclaimer: text.disclaimer,
+                dataSources: text.dataSources
             }
         };
 

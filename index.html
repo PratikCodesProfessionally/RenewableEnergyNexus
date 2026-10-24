@@ -1310,51 +1310,53 @@
         <section class="greenplan-section" id="greenplan-chat">
             <div class="section-header">
                 <h2><i class="fas fa-robot"></i> GreenPlan Copilot</h2>
-                <p id="greenplan-subtitle">In wenigen Minuten zu drei passenden Energie-Optionen fuer dein Projekt.</p>
+                <p id="greenplan-subtitle">Get three tailored energy plan options for your project in just a few minutes.</p>
             </div>
 
             <form id="greenplan-form" class="greenplan-form">
                 <div class="greenplan-grid">
                     <div class="form-group">
-                        <label for="gp-language">Sprache / Language</label>
+                        <label for="gp-language">Language</label>
                         <select id="gp-language" required>
-                            <option value="de" selected>Deutsch</option>
-                            <option value="en">English</option>
+                            <option value="en" selected>English</option>
+                            <option value="de">Deutsch</option>
+                            <option value="fr">Français</option>
+                            <option value="es">Español</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-location">Standort (PLZ oder Ort)</label>
-                        <input id="gp-location" type="text" required placeholder="z. B. 50667 Koeln">
+                        <label for="gp-location">Location (ZIP or city)</label>
+                        <input id="gp-location" type="text" required placeholder="e.g. 50667 Cologne">
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-project-type">Projekttyp</label>
+                        <label for="gp-project-type">Project type</label>
                         <select id="gp-project-type" required>
-                            <option value="residential_single_family">Einfamilienhaus</option>
-                            <option value="multi_family">Mehrfamilienhaus</option>
-                            <option value="commercial">Gewerbe</option>
-                            <option value="municipal">Kommune</option>
+                            <option value="residential_single_family">Single-family home</option>
+                            <option value="multi_family">Multi-family building</option>
+                            <option value="commercial">Commercial</option>
+                            <option value="municipal">Municipal</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-consumption">Jaehrlicher Stromverbrauch (kWh)</label>
+                        <label for="gp-consumption">Annual electricity consumption (kWh)</label>
                         <input id="gp-consumption" type="number" min="500" step="100" required placeholder="4500">
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-area">Nutzbare Dachflaeche (m2)</label>
+                        <label for="gp-area">Usable roof area (m2)</label>
                         <input id="gp-area" type="number" min="5" step="1" required placeholder="55">
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-shading">Verschattung</label>
+                        <label for="gp-shading">Shading</label>
                         <select id="gp-shading" required>
-                            <option value="none">Keine</option>
-                            <option value="low" selected>Leicht</option>
-                            <option value="medium">Mittel</option>
-                            <option value="high">Stark</option>
+                            <option value="none">None</option>
+                            <option value="low" selected>Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
                         </select>
                     </div>
 
@@ -1364,55 +1366,55 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-goal">Primaeres Ziel</label>
+                        <label for="gp-goal">Primary goal</label>
                         <select id="gp-goal" required>
-                            <option value="cost_reduction">Kosten senken</option>
-                            <option value="co2_reduction">CO2 reduzieren</option>
-                            <option value="autarky">Autarkie erhoehen</option>
-                            <option value="security">Versorgungssicherheit</option>
+                            <option value="cost_reduction">Reduce costs</option>
+                            <option value="co2_reduction">Reduce CO2</option>
+                            <option value="autarky">Increase self-sufficiency</option>
+                            <option value="security">Improve energy security</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-battery">Batteriespeicher</label>
+                        <label for="gp-battery">Battery storage</label>
                         <select id="gp-battery" required>
-                            <option value="yes">Ja</option>
-                            <option value="no">Nein</option>
-                            <option value="unsure" selected>Unsicher</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                            <option value="unsure" selected>Not sure</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-heatpump">Waermepumpe</label>
+                        <label for="gp-heatpump">Heat pump</label>
                         <select id="gp-heatpump" required>
-                            <option value="existing">Vorhanden</option>
-                            <option value="planned">Geplant</option>
-                            <option value="no" selected>Nein</option>
+                            <option value="existing">Existing</option>
+                            <option value="planned">Planned</option>
+                            <option value="no" selected>No</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-ev">E-Mobilitaet</label>
+                        <label for="gp-ev">E-mobility</label>
                         <select id="gp-ev" required>
-                            <option value="yes">Ja</option>
-                            <option value="planned">Geplant</option>
-                            <option value="no" selected>Nein</option>
+                            <option value="yes">Yes</option>
+                            <option value="planned">Planned</option>
+                            <option value="no" selected>No</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-amortization">Amortisation wichtig (1-10)</label>
+                        <label for="gp-amortization">Payback importance (1-10)</label>
                         <input id="gp-amortization" type="number" min="1" max="10" step="1" value="7" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="gp-co2">CO2-Einsparung wichtig (1-10)</label>
+                        <label for="gp-co2">CO2 reduction importance (1-10)</label>
                         <input id="gp-co2" type="number" min="1" max="10" step="1" value="7" required>
                     </div>
                 </div>
 
                 <button type="submit" class="greenplan-submit">
-                    <i class="fas fa-wand-magic-sparkles"></i> Empfehlung berechnen
+                    <i class="fas fa-wand-magic-sparkles"></i> Calculate recommendation
                 </button>
             </form>
 
@@ -1420,7 +1422,7 @@
             <div id="greenplan-results" class="greenplan-results" aria-live="polite"></div>
             <div class="greenplan-actions">
                 <button id="greenplan-download" type="button" class="greenplan-download" disabled>
-                    <i class="fas fa-file-pdf"></i> Bericht als PDF herunterladen
+                    <i class="fas fa-file-pdf"></i> Download report as PDF
                 </button>
             </div>
         </section>
@@ -1557,7 +1559,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="RenewableEnergyNexus/js/emailSubscription.js"></script>
-    <script src="RenewableEnergyNexus/js/chatUiTextBlocks.de.js" defer></script>
+    <script src="RenewableEnergyNexus/js/chatUiTextBlocks.js" defer></script>
     <script src="RenewableEnergyNexus/js/script.js" defer></script>  <!-- Add defer attribute -->
     <script src="RenewableEnergyNexus/js/presentation.js" defer></script>
     <script src="RenewableEnergyNexus/js/windTurbine3d.js" defer></script>

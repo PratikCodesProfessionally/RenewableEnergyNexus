@@ -449,42 +449,54 @@ function escapeHtml(value) {
 }
 
 let lastGreenPlanResult = null;
-let greenPlanLang = 'de';
+let greenPlanLang = 'en';
+
+const GREENPLAN_FALLBACK_LANG = 'en';
 
 function getGreenPlanTexts(lang = greenPlanLang) {
-    if (window.chatUiTextBlocks && window.chatUiTextBlocks[lang]) {
-        return window.chatUiTextBlocks[lang];
+    const blocks = window.chatUiTextBlocks;
+
+    if (blocks && blocks[lang]) {
+        return blocks[lang];
     }
 
-    if (window.chatUiTextBlocksDe) {
-        return window.chatUiTextBlocksDe;
+    if (blocks && blocks[GREENPLAN_FALLBACK_LANG]) {
+        return blocks[GREENPLAN_FALLBACK_LANG];
     }
 
+    // Minimal English safety net if the text blocks failed to load.
     return {
+        locale: 'en-US',
+        units: { years: 'years', kg: 'kg', currency: 'EUR' },
         progress: {
-            collecting: 'Ich sammle gerade deine Projektdaten...',
-            calculating: 'Ich berechne gerade deine Optionen mit Deutschland-Annahmen...',
-            done: 'Fertig! Deine Empfehlungen sind bereit.'
+            collecting: 'Collecting your project data...',
+            calculating: 'Calculating your options...',
+            done: 'Done. Your recommendations are ready.'
+        },
+        validation: {
+            confirmProceed: 'Do you want to run the calculation anyway?',
+            paused: 'Calculation paused. Adjust your inputs and run again.'
         },
         recommendation: {
-            title: 'Dein Ergebnis: 3 machbare Energie-Optionen',
-            selected: 'Empfohlene Option: {{planLabel}}',
+            title: 'Your result: 3 feasible energy options',
+            selected: 'Recommended option: {{planLabel}}',
+            cards: {},
+            reasons: { base: '', goalPrefix: 'Primary goal', byPlan: {} },
+            nextStepByPlan: {},
             metrics: {
-                capex: 'Investition',
-                payback: 'Amortisation',
-                co2: 'CO2-Einsparung pro Jahr',
-                autarky: 'Autarkiegrad',
-                savings: 'Jaehrliche Ersparnis'
-            }
+                capex: 'Investment',
+                payback: 'Payback',
+                co2: 'Annual CO2 savings',
+                autarky: 'Self-sufficiency rate',
+                savings: 'Annual savings'
+            },
+            nextStepLabel: 'Next step'
         },
-        nextSteps: {
-            title: 'Naechste Schritte',
-            cta: 'Bericht als PDF herunterladen'
-        },
+        nextSteps: { title: 'Next steps' },
         errors: {
-            generic: 'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es erneut.',
-            functionUnavailable: 'Die lokale Function ist nicht erreichbar (HTTP 404/501). Bitte mit Netlify Dev starten: netlify dev --port 8888.',
-            serverError: 'Der Server hat einen Fehler gemeldet. Bitte pruefe die Function-Logs.'
+            generic: 'An unexpected error occurred. Please try again.',
+            functionUnavailable: 'The local function is unavailable (HTTP 404/501).',
+            serverError: 'The server returned an error.'
         }
     };
 }
@@ -559,51 +571,37 @@ function applyGreenPlanLocale(lang) {
     }
 }
 
+function getColon(texts) {
+    return texts.colon || ': ';
+}
+
 function getLocalizedPlanLabel(planId, texts) {
     return (texts.recommendation.cards && texts.recommendation.cards[planId]) || planId;
 }
 
+function getLocalizedOptionLabel(group, value, texts) {
+    const options = (texts.selectOptions && texts.selectOptions[group]) || [];
+    const match = options.find((option) => option.value === value);
+    return match ? match.label : String(value).replace(/_/g, ' ');
+}
+
 function getLocalizedPlanReasons(planId, goal, texts) {
-    const isEnglish = texts.locale && String(texts.locale).startsWith('en');
-    const reasons = [];
+    const reasons = texts.recommendation.reasons || {};
+    const out = [];
 
-    if (isEnglish) {
-        reasons.push('Selected based on your priorities for economics, CO2, feasibility, and resilience.');
-        reasons.push(`Primary goal: ${goal.replace('_', ' ')}`);
+    if (reasons.base) out.push(reasons.base);
 
-        if (planId === 'roi_plan') reasons.push('Best balance between upfront cost and savings potential.');
-        if (planId === 'green_plan') reasons.push('Highest impact on CO2 reduction and self-sufficiency.');
-        if (planId === 'budget_plan') reasons.push('Lowest capital requirement with a clear entry path.');
-        return reasons;
-    }
+    const goalLabel = getLocalizedOptionLabel('primaryGoal', goal, texts);
+    out.push(`${reasons.goalPrefix || 'Primary goal'}${getColon(texts)}${goalLabel}`);
 
-    reasons.push('Auswahl nach Prioritaeten fuer Wirtschaftlichkeit, CO2, Umsetzbarkeit und Resilienz');
-    reasons.push(`Primaeres Ziel: ${goal.replace('_', ' ')}`);
+    const planReason = reasons.byPlan && reasons.byPlan[planId];
+    if (planReason) out.push(planReason);
 
-    if (planId === 'roi_plan') reasons.push('Beste Balance zwischen Investitionshoehe und Einsparpotenzial');
-    if (planId === 'green_plan') reasons.push('Hoechste Wirkung bei CO2-Reduktion und Autarkiegrad');
-    if (planId === 'budget_plan') reasons.push('Niedrigster Kapitaleinsatz mit sauberem Einstiegspfad');
-    return reasons;
+    return out;
 }
 
 function getLocalizedNextStep(planId, texts) {
-    const isEnglish = texts.locale && String(texts.locale).startsWith('en');
-    const nextStepMap = {
-        budget_plan: {
-            de: 'Dachpruefung und zwei Vergleichsangebote einholen',
-            en: 'Check the roof and request two comparison quotes'
-        },
-        roi_plan: {
-            de: 'Lastprofil mit Installateur validieren und Komponenten fein auslegen',
-            en: 'Validate the load profile with the installer and fine-tune components'
-        },
-        green_plan: {
-            de: 'Netzanschlussleistung und Speicherstandort verbindlich pruefen',
-            en: 'Verify grid connection capacity and storage location'
-        }
-    };
-
-    return (nextStepMap[planId] && nextStepMap[planId][isEnglish ? 'en' : 'de']) || '';
+    return (texts.recommendation.nextStepByPlan && texts.recommendation.nextStepByPlan[planId]) || '';
 }
 
 function renderGreenPlanResults(data, texts) {
@@ -627,8 +625,9 @@ function renderGreenPlanResults(data, texts) {
         </div>
     `;
 
-    const numberFormatter = new Intl.NumberFormat(texts.locale || 'de-DE');
-    const decimalFormatter = new Intl.NumberFormat(texts.locale || 'de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const colon = getColon(texts);
+    const numberFormatter = new Intl.NumberFormat(texts.locale || 'en-US');
+    const decimalFormatter = new Intl.NumberFormat(texts.locale || 'en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
     const cards = data.plans.map((plan) => {
         const capexMin = numberFormatter.format(plan.financials.capexEUR.min);
@@ -645,12 +644,12 @@ function renderGreenPlanResults(data, texts) {
         return `
             <article class="greenplan-card ${isRecommended ? 'recommended' : ''}">
             <h4>${escapeHtml(getLocalizedPlanLabel(plan.id, texts))}</h4>
-                <p><strong>${escapeHtml(texts.recommendation.metrics.capex)}:</strong> ${capexMin} - ${capexMax} EUR</p>
-                <p><strong>${escapeHtml(texts.recommendation.metrics.payback)}:</strong> ${paybackMin} - ${paybackMax} Jahre</p>
-                <p><strong>${escapeHtml(texts.recommendation.metrics.savings)}:</strong> ${savingsMin} - ${savingsMax} EUR</p>
-                <p><strong>${escapeHtml(texts.recommendation.metrics.co2)}:</strong> ${co2} kg</p>
-                <p><strong>${escapeHtml(texts.recommendation.metrics.autarky)}:</strong> ${autarky}%</p>
-                <p><strong>${escapeHtml(texts.recommendation.nextStepLabel)}:</strong> ${nextStep}</p>
+                <p><strong>${escapeHtml(texts.recommendation.metrics.capex)}${escapeHtml(colon)}</strong>${capexMin} - ${capexMax} ${escapeHtml(texts.units.currency)}</p>
+                <p><strong>${escapeHtml(texts.recommendation.metrics.payback)}${escapeHtml(colon)}</strong>${paybackMin} - ${paybackMax} ${escapeHtml(texts.units.years)}</p>
+                <p><strong>${escapeHtml(texts.recommendation.metrics.savings)}${escapeHtml(colon)}</strong>${savingsMin} - ${savingsMax} ${escapeHtml(texts.units.currency)}</p>
+                <p><strong>${escapeHtml(texts.recommendation.metrics.co2)}${escapeHtml(colon)}</strong>${co2} ${escapeHtml(texts.units.kg)}</p>
+                <p><strong>${escapeHtml(texts.recommendation.metrics.autarky)}${escapeHtml(colon)}</strong>${autarky}%</p>
+                <p><strong>${escapeHtml(texts.recommendation.nextStepLabel)}${escapeHtml(colon)}</strong>${nextStep}</p>
             </article>
         `;
     }).join('');
@@ -700,11 +699,28 @@ function exportGreenPlanPdf(data, texts) {
     const marginX = 40;
     let y = 48;
 
+    const locale = texts.locale || 'en-US';
+    const colon = getColon(texts);
+    const numberFormatter = new Intl.NumberFormat(locale);
+    const decimalFormatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
     const title = texts.recommendation.title;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.text(title, marginX, y);
-    y += 24;
+    y += 20;
+
+    if (texts.report && texts.report.generatedOn) {
+        const generatedAt = data.meta && data.meta.generatedAt ? new Date(data.meta.generatedAt) : new Date();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(
+            texts.report.generatedOn.replace('{{date}}', generatedAt.toLocaleDateString(locale)),
+            marginX,
+            y
+        );
+        y += 18;
+    }
 
     const selectedPlan = (data.plans || []).find((p) => p.id === data.selectedRecommendation.planId) || data.plans[0];
     doc.setFont('helvetica', 'normal');
@@ -731,13 +747,14 @@ function exportGreenPlanPdf(data, texts) {
         y += 16;
         doc.setFont('helvetica', 'normal');
 
+        const metrics = texts.recommendation.metrics;
         const lines = [
-            `${texts.recommendation.metrics.capex}: ${plan.financials.capexEUR.min} - ${plan.financials.capexEUR.max} EUR`,
-            `${texts.recommendation.metrics.payback}: ${plan.financials.paybackYears.min} - ${plan.financials.paybackYears.max} Jahre`,
-            `${texts.recommendation.metrics.savings}: ${plan.financials.annualSavingsEUR.min} - ${plan.financials.annualSavingsEUR.max} EUR`,
-            `${texts.recommendation.metrics.co2}: ${plan.impact.annualCo2SavingsKg} kg`,
-            `${texts.recommendation.metrics.autarky}: ${plan.impact.autarkyPct}%`,
-            `${texts.recommendation.nextStepLabel}: ${getLocalizedNextStep(plan.id, texts) || plan.next7DayAction}`
+            `${metrics.capex}${colon}${numberFormatter.format(plan.financials.capexEUR.min)} - ${numberFormatter.format(plan.financials.capexEUR.max)} ${texts.units.currency}`,
+            `${metrics.payback}${colon}${decimalFormatter.format(plan.financials.paybackYears.min)} - ${decimalFormatter.format(plan.financials.paybackYears.max)} ${texts.units.years}`,
+            `${metrics.savings}${colon}${numberFormatter.format(plan.financials.annualSavingsEUR.min)} - ${numberFormatter.format(plan.financials.annualSavingsEUR.max)} ${texts.units.currency}`,
+            `${metrics.co2}${colon}${numberFormatter.format(Number(plan.impact.annualCo2SavingsKg))} ${texts.units.kg}`,
+            `${metrics.autarky}${colon}${numberFormatter.format(Number(plan.impact.autarkyPct))}%`,
+            `${texts.recommendation.nextStepLabel}${colon}${getLocalizedNextStep(plan.id, texts) || plan.next7DayAction}`
         ];
 
         lines.forEach((line) => {
@@ -764,7 +781,26 @@ function exportGreenPlanPdf(data, texts) {
         });
     }
 
-    doc.save(`greenplan-report-${Date.now()}.pdf`);
+    const disclaimer = data.legal && data.legal.disclaimer;
+    if (disclaimer) {
+        if (y > 700) {
+            doc.addPage();
+            y = 48;
+        }
+        y += 10;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text((texts.report && texts.report.disclaimerTitle) || '', marginX, y);
+        y += 14;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.splitTextToSize(disclaimer, 510).forEach((line) => {
+            doc.text(line, marginX, y);
+            y += 12;
+        });
+    }
+
+    doc.save(`greenplan-report-${greenPlanLang}-${Date.now()}.pdf`);
     return true;
 }
 
@@ -774,20 +810,19 @@ function setGreenPlanStatus(statusEl, message, type) {
 }
 
 function checkGreenPlanPlausibility(payload, texts) {
+    const validation = texts.validation || {};
     const conflicts = [];
 
     if ((payload.primaryGoal === 'autarky' || payload.primaryGoal === 'co2_reduction') && payload.budgetEUR < 12000) {
-        conflicts.push(texts.validation && texts.validation.conflictBudgetAutarky
-            ? texts.validation.conflictBudgetAutarky
-            : 'Dein Ziel ist ambitioniert, aber das Budget wirkt dafuer knapp.');
+        if (validation.conflictBudgetAutarky) conflicts.push(validation.conflictBudgetAutarky);
     }
 
     if (payload.availableRoofAreaM2 < 15 && payload.annualConsumptionKWh > 7000) {
-        conflicts.push('Die Dachflaeche ist sehr klein im Verhaeltnis zum Strombedarf. Die Optionen werden wahrscheinlich begrenzt sein.');
+        if (validation.conflictRoofTooSmall) conflicts.push(validation.conflictRoofTooSmall);
     }
 
     if (payload.amortizationImportance >= 9 && payload.co2Importance >= 9) {
-        conflicts.push('Sehr hohe Prioritaet fuer schnelle Amortisation und maximale CO2-Einsparung gleichzeitig kann Zielkonflikte erzeugen.');
+        if (validation.conflictCompetingPriorities) conflicts.push(validation.conflictCompetingPriorities);
     }
 
     if (conflicts.length === 0) {
@@ -848,9 +883,9 @@ function setupGreenPlanChat() {
             const plausibility = checkGreenPlanPlausibility(payload, texts);
             if (plausibility.hasConflict) {
                 setGreenPlanStatus(statusEl, plausibility.message, 'warning');
-                const proceed = window.confirm(`${plausibility.message}\n\nMoechtest du die Berechnung trotzdem starten?`);
+                const proceed = window.confirm(`${plausibility.message}\n\n${texts.validation.confirmProceed}`);
                 if (!proceed) {
-                    setGreenPlanStatus(statusEl, 'Berechnung pausiert. Passe die Eingaben an und starte erneut.', 'warning');
+                    setGreenPlanStatus(statusEl, texts.validation.paused, 'warning');
                     return;
                 }
             }
