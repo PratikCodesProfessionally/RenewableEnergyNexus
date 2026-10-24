@@ -181,7 +181,10 @@
                             <div><dt>Capacity factor</dt><dd id="wt-cf">–</dd><dd class="wt-sub" id="wt-cf-sub"></dd></div>
                             <div><dt>Energy per year</dt><dd id="wt-aep">–</dd><dd class="wt-sub" id="wt-aep-sub"></dd></div>
                         </dl>
-                        <p class="wt-formula">P = ½ · ρ · A · v³ · C<sub>p</sub> · η &nbsp;·&nbsp; ρ = 1.225 kg/m³ · <span id="wt-formula-area">A = πR²</span><br>Yearly energy: power curve × Rayleigh wind distribution at hub height</p>
+                        <details class="wt-formula-details">
+                            <summary><span class="wt-formula-label-show">Show the physics</span><span class="wt-formula-label-hide">Hide the physics</span></summary>
+                            <p class="wt-formula">P = ½ · ρ · A · v³ · C<sub>p</sub> · η &nbsp;·&nbsp; ρ = 1.225 kg/m³ · <span id="wt-formula-area">A = πR²</span><br>Yearly energy: power curve × Rayleigh wind distribution at hub height</p>
+                        </details>
                     </div>
                 </div>
 
@@ -334,7 +337,10 @@
                         <div><dt>Grid</dt><dd id="sh-grid">–</dd><dd class="wt-sub" id="sh-grid-sub"></dd></div>
                         <div><dt>Car battery</dt><dd id="sh-car">–</dd><dd class="wt-sub" id="sh-car-sub"></dd></div>
                     </dl>
-                    <p class="wt-formula">P = G<sub>POA</sub> · A · η<sub>module</sub> · η<sub>inverter</sub> · PR<br>G<sub>POA</sub> = DNI · cos θ + DHI · (1 + cos β) / 2 · β = 35°, latitude 50° N</p>
+                    <details class="wt-formula-details">
+                        <summary><span class="wt-formula-label-show">Show the physics</span><span class="wt-formula-label-hide">Hide the physics</span></summary>
+                        <p class="wt-formula">P = G<sub>POA</sub> · A · η<sub>module</sub> · η<sub>inverter</sub> · PR<br>G<sub>POA</sub> = DNI · cos θ + DHI · (1 + cos β) / 2 · β = 35°, latitude 50° N</p>
+                    </details>
                     </div>
                 </div>
 
@@ -476,7 +482,10 @@
                             <div><dt>Water</dt><dd id="h2-water">–</dd><dd class="wt-sub" id="h2-water-sub"></dd></div>
                             <div><dt>Storage</dt><dd id="h2-store">–</dd><dd class="wt-sub" id="h2-store-sub"></dd></div>
                         </dl>
-                        <p class="wt-formula">ṁ<sub>H₂</sub> = N · I · η<sub>F</sub> / (2F) · M<sub>H₂</sub> &nbsp;(Faraday, F = 96,485 C/mol)<br>U<sub>cell</sub> = 1.45 V + 0.25 V·cm²/A · j · η = ṁ · 33.3 kWh/kg / P<sub>in</sub></p>
+                        <details class="wt-formula-details">
+                            <summary><span class="wt-formula-label-show">Show the physics</span><span class="wt-formula-label-hide">Hide the physics</span></summary>
+                            <p class="wt-formula">ṁ<sub>H₂</sub> = N · I · η<sub>F</sub> / (2F) · M<sub>H₂</sub> &nbsp;(Faraday, F = 96,485 C/mol)<br>U<sub>cell</sub> = 1.45 V + 0.25 V·cm²/A · j · η = ṁ · 33.3 kWh/kg / P<sub>in</sub></p>
+                        </details>
                     </div>
                 </div>
 
@@ -635,7 +644,10 @@
                             <div><dt>Sediment</dt><dd id="hy-sed">–</dd><dd class="wt-sub" id="hy-sed-sub"></dd></div>
                             <div><dt>Flow swing</dt><dd id="hy-swing">–</dd><dd class="wt-sub" id="hy-swing-sub"></dd></div>
                         </dl>
-                        <p class="wt-formula">P = ρ · g · Q · H<sub>net</sub> · η<sub>turbine</sub> · η<sub>generator</sub><br>H<sub>net</sub> = 350 m − 18 m · (Q / 30 m³/s)² · units stop above 5 kg/m³ of sediment</p>
+                        <details class="wt-formula-details">
+                            <summary><span class="wt-formula-label-show">Show the physics</span><span class="wt-formula-label-hide">Hide the physics</span></summary>
+                            <p class="wt-formula">P = ρ · g · Q · H<sub>net</sub> · η<sub>turbine</sub> · η<sub>generator</sub><br>H<sub>net</sub> = 350 m − 18 m · (Q / 30 m³/s)² · units stop above 5 kg/m³ of sediment</p>
+                        </details>
                     </div>
                 </div>
 
@@ -696,7 +708,7 @@
 
             <!-- CALCULATOR-->
 
-            <div class="feature-card">
+            <div class="feature-card" id="calculator">
                 <div class="feature-icon">
                     <i class="fas fa-calculator"></i>
                 </div>

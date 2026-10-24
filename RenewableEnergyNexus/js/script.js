@@ -416,16 +416,20 @@ function loadArticles() {
 function setupSmoothScroll() {
     document.querySelectorAll('nav a').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
-            if (this.hash.startsWith('#')) {
-                e.preventDefault();
-                const target = document.querySelector(this.hash);
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 20,
-                        behavior: 'smooth'
-                    });
-                }
-            }
+            if (!this.hash.startsWith('#')) return;
+
+            // Links such as index.html#education point at another page: let the
+            // browser follow them instead of trying to scroll on this one.
+            if (this.pathname !== window.location.pathname) return;
+
+            const target = document.querySelector(this.hash);
+            if (!target) return;
+
+            e.preventDefault();
+            window.scrollTo({
+                top: target.offsetTop - 20,
+                behavior: 'smooth'
+            });
         });
     });
 }

@@ -4282,3 +4282,70 @@ button.hero-btn-primary {
         height: 200px;
     }
 }
+
+/* Long URLs printed as link text used to push the page sideways on phones */
+.article-content a,
+.article-sources a,
+.article-figure .image-credit a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Collapsible physics panel under each 3D explorer */
+.wt-formula-details {
+    margin: 0;
+}
+
+.wt-formula-details > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.72);
+    padding: 0.35rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.wt-formula-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.wt-formula-details > summary::before {
+    content: "\f0d7";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+}
+
+.wt-formula-details[open] > summary::before {
+    transform: rotate(-90deg);
+}
+
+.wt-formula-details > summary:hover,
+.wt-formula-details > summary:focus-visible {
+    background: rgba(76, 175, 80, 0.16);
+    border-color: rgba(76, 175, 80, 0.55);
+    color: #fff;
+}
+
+.wt-formula-details .wt-formula {
+    margin-top: 0.7rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid rgba(76, 175, 80, 0.45);
+}
+
+.wt-formula-details > summary .wt-formula-label-hide,
+.wt-formula-details[open] > summary .wt-formula-label-show {
+    display: none;
+}
+
+.wt-formula-details[open] > summary .wt-formula-label-hide {
+    display: inline;
+}
