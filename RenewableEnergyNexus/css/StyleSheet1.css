@@ -1627,9 +1627,13 @@ select {
         display: block !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 180px;
-        object-fit: cover !important;
-        object-position: center center !important; /* center the crop */
+        /* Show the whole photo: a fixed-height cover crop was cutting
+           subjects off, such as the dancer's head and feet. */
+        height: auto;
+        aspect-ratio: 3 / 2;
+        object-fit: contain !important;
+        object-position: center center !important;
+        background: rgba(0, 0, 0, 0.28);
         margin: 0 !important;
         transition: transform 0.3s ease;
     }
