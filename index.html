@@ -83,6 +83,7 @@
                         <button type="button" data-action="expand" aria-pressed="false" title="Expand explorer" aria-label="Expand explorer"><i class="fas fa-expand"></i></button>
                     </div>
                     <p class="wt-hint"><i class="fas fa-hand-pointer"></i> Drag to rotate · click a part · click, then scroll to zoom</p>
+                    <p id="wd-slowmo" class="wd-slowmo" hidden><i class="fas fa-hourglass-half"></i> Rotor shown in slow motion so you can watch the blades pitch</p>
 
                     <!-- Shown only when WebGL is unavailable -->
                     <div class="windrad-fallback" aria-hidden="true">
@@ -187,6 +188,63 @@
                             <p class="wt-formula">P = ½ · ρ · A · v³ · C<sub>p</sub> · η &nbsp;·&nbsp; ρ = 1.225 kg/m³ · <span id="wt-formula-area">A = πR²</span><br>Yearly energy: power curve × Rayleigh wind distribution at hub height</p>
                         </details>
                     </div>
+                </div>
+
+                <div class="wt-card wd-pitch">
+                    <div class="wt-card-head">
+                        <h3><i class="fas fa-sync-alt"></i> Pitch regulation: how a Windrad limits its power</h3>
+                    </div>
+                    <details id="wd-pitch-details" class="wt-formula-details wd-pitch-details">
+                    <summary><span class="wt-formula-label-show">Show pitch regulation</span><span class="wt-formula-label-hide">Hide pitch regulation</span></summary>
+                    <div class="wd-pitch-actions">
+                        <button type="button" class="wt-tour-btn" data-action="sweep" aria-pressed="false"><i class="fas fa-wind"></i><span>Sweep wind 0→30 m/s</span></button>
+                        <button type="button" class="wt-tour-btn wd-estop" data-action="estop" aria-pressed="false"><i class="fas fa-hand-paper"></i><span>Emergency stop</span></button>
+                    </div>
+                    <p id="wd-pitch-note" class="wd-pitch-note" hidden></p>
+
+                    <div class="wd-pitch-body">
+                        <div class="wd-section">
+                            <figure class="wd-airfoil-fig">
+                                <svg id="wd-airfoil" viewBox="0 0 360 270" role="img" aria-labelledby="wd-airfoil-cap"></svg>
+                                <figcaption id="wd-airfoil-cap">Blade cross-section at 75% of the radius, seen from the blade tip. The blade meets the <strong>relative wind W</strong>, the sum of the incoming wind and the blade’s own motion. The angle between the chord and W is the <strong>angle of attack α</strong>; turning the blade by the <strong>pitch angle β</strong> changes α, and with it the lift that drives the rotor.</figcaption>
+                            </figure>
+                            <dl class="wt-readouts wd-pitch-read">
+                                <div><dt>Pitch angle β</dt><dd id="wd-beta">–</dd><dd class="wt-sub">blade angle to the rotor plane</dd></div>
+                                <div><dt>Angle of attack α</dt><dd id="wd-alpha">–</dd><dd class="wt-sub" id="wd-alpha-sub"></dd></div>
+                                <div><dt>Tip-speed ratio λ</dt><dd id="wd-lambda">–</dd><dd class="wt-sub">blade tip speed ÷ wind</dd></div>
+                                <div><dt>Power coeff. C<sub>p</sub></dt><dd id="wd-cp">–</dd><dd class="wt-sub">share of wind power caught</dd></div>
+                                <div class="wd-read-wide"><dt>Control region</dt><dd id="wd-region">–</dd><dd class="wt-sub" id="wd-region-sub"></dd></div>
+                            </dl>
+                        </div>
+
+                        <div class="wd-curves" tabindex="0" aria-label="Power and pitch curves. Use the left and right arrow keys to read values at each wind speed.">
+                            <div class="wd-curves-head">
+                                <span id="wd-power-title" class="wd-model-tag"></span>
+                                <ul class="wd-legend" aria-label="Legend">
+                                    <li><i class="wd-key-1"></i>With pitch control</li>
+                                    <li><i class="wd-key-2"></i>Without pitch control (blades fixed at 0°)</li>
+                                    <li><i class="wd-key-dot"></i>Operating point now</li>
+                                </ul>
+                            </div>
+                            <svg id="wd-chart-power" class="wd-chart" viewBox="0 0 440 168" role="img" aria-label="Power curve with and without pitch control against wind speed"></svg>
+                            <svg id="wd-chart-pitch" class="wd-chart" viewBox="0 0 440 168" role="img" aria-label="Blade pitch angle against wind speed"></svg>
+                            <div id="wd-tip" class="wd-tip" hidden></div>
+                            <ol class="wd-regions">
+                                <li data-region="I"><strong>I</strong> Below cut-in: the rotor idles.</li>
+                                <li data-region="II"><strong>II</strong> Blades at 0°; the generator torque keeps the best tip-speed ratio, so C<sub>p</sub> stays at its peak.</li>
+                                <li data-region="III"><strong>III</strong> Above rated wind the speed is held and the blades pitch towards feather, so the power stays flat.</li>
+                                <li data-region="IV"><strong>IV</strong> Above cut-out the blades feather to 90° and the rotor is parked.</li>
+                            </ol>
+                            <details class="wd-table">
+                                <summary>Show the data as a table</summary>
+                                <table>
+                                    <thead><tr><th scope="col">Wind (m/s)</th><th scope="col">With pitch</th><th scope="col">Without pitch</th><th scope="col">Pitch β</th></tr></thead>
+                                    <tbody id="wd-table-body"></tbody>
+                                </table>
+                            </details>
+                        </div>
+                    </div>
+                    </details>
                 </div>
 
                 <div class="wt-card wt-howto">

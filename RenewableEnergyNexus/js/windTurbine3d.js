@@ -81,11 +81,72 @@
     };
     const FARM = { onshore: 6, offshore: 12 };
 
+    /*  Power coefficient Cp(lambda, beta): the widely used analytical fit by
+        Heier / Slootweg et al. It peaks at Cp = 0.48 for lambda = 8.1 and
+        beta = 0 deg, and falls as the blades pitch towards feather. Each model
+        rescales it to its own optimum tip-speed ratio and peak Cp. */
+    const HEIER_LOPT = 8.1;
+    const HEIER_CPMAX = 0.48;
+    function cpHeier(lam, beta) {
+        if (lam <= 0.05) return 0;
+        const li = 1 / (1 / (lam + 0.08 * beta) - 0.035 / (beta * beta * beta + 1));
+        return Math.max(0, 0.5176 * (116 / li - 0.4 * beta - 5) * Math.exp(-21 / li) + 0.0068 * lam);
+    }
+    function cpOf(m, lam, beta) { return cpHeier(lam * HEIER_LOPT / m.tsr, beta) * m.cp / HEIER_CPMAX; }
+    /*  Blade-element view at 75 % of the radius (used both for the diagram
+        and to find the pitch angle above rated wind). */
+    const DESIGN_ALPHA = 6;                                   // deg, best lift-to-drag
+    function clcd(alpha) {
+        let cl;
+        if (alpha > 12) cl = Math.max(0.6, 1.5 - 0.05 * (alpha - 12));          // stalled
+        else if (alpha < -10) cl = -0.7;
+        else cl = 0.3 + 0.1 * alpha;                                             // cambered airfoil
+        const cd = 0.01 + 0.0006 * alpha * alpha + (alpha > 12 ? 0.03 * (alpha - 12) : 0);
+        return { cl: cl, cd: cd };
+    }
+    function twistOf(m) { return Math.atan2(2 / 3, 0.75 * m.tsr) * 180 / Math.PI - DESIGN_ALPHA; }
+    function inductionOf(m, cp) { return cp > 0 ? clamp(cp / m.cp * 0.33, 0, 0.33) : 0; }
+    function sectionFlow(m, v, omega, cp) {
+        const r = 0.75 * m.R;
+        const a = inductionOf(m, cp);
+        const vAx = v * (1 - a);
+        const vRot = omega * r;
+        return { r: r, a: a, vAx: vAx, vRot: vRot, W: Math.hypot(vAx, vRot), phi: vRot > 0.01 || vAx > 0.01 ? Math.atan2(vAx, vRot) * 180 / Math.PI : 90 };
+    }
+    /** In-plane force per unit dynamic pressure: W^2 (CL sin(phi) - CD cos(phi)). */
+    function drivingForce(f, alpha) {
+        const c = clcd(alpha);
+        const ph = f.phi * Math.PI / 180;
+        return f.W * f.W * (c.cl * Math.sin(ph) - c.cd * Math.cos(ph));
+    }
+    /** Pitch (deg) above rated wind: hold the section's driving force at its rated value,
+        so torque, rotor speed and power stay constant. */
+    function pitchAboveRated(m, v, omega, cp) {
+        const fr = sectionFlow(m, m.ratedWind, omega, m.cp);
+        const target = drivingForce(fr, DESIGN_ALPHA);
+        const f = sectionFlow(m, v, omega, cp);
+        let lo = -10;
+        let hi = DESIGN_ALPHA;
+        for (let i = 0; i < 30; i++) {
+            const mid = (lo + hi) / 2;
+            if (drivingForce(f, mid) > target) hi = mid; else lo = mid;
+        }
+        return Math.max(0, f.phi - twistOf(m) - (lo + hi) / 2);
+    }
+
     /** Steady-state operating point of model m at hub wind speed v (m/s). */
-    function operatingPoint(m, v) {
+    function operatingPoint(m, v, estop) {
         const pAvail = 0.5 * RHO * m.area * v * v * v;
-        const out = { v: v, pAvail: pAvail, powerW: 0, cp: 0, omega: 0, rpm: 0, genRpm: 0, pitchDeg: 0, furlDeg: 0, state: 'idle' };
+        const out = { v: v, pAvail: pAvail, powerW: 0, cp: 0, omega: 0, rpm: 0, genRpm: 0, pitchDeg: 0, furlDeg: 0, tsr: 0, region: 'I', state: 'idle' };
+        if (estop) {
+            out.state = 'estop';
+            out.region = 'stop';
+            if (m.kind === 'hawt') out.pitchDeg = 90;
+            if (m.kind === 'small') out.furlDeg = 75;
+            return out;
+        }
         if (v >= m.cutOut) {
+            out.region = 'IV';
             out.state = 'parked';
             if (m.kind === 'hawt') out.pitchDeg = 90;
             if (m.kind === 'small') out.furlDeg = 75;
@@ -100,17 +161,39 @@
         out.omega = m.tsr * vTrack / m.R;
         out.rpm = out.omega * 60 / (2 * Math.PI);
         out.genRpm = out.rpm * m.gear;
+        out.tsr = out.omega * m.R / v;
         out.powerW = Math.min(pAvail * m.cp * m.eff, m.ratedKw * 1000);
         out.cp = out.powerW / (pAvail * m.eff);
         if (v > m.ratedWind) {
             out.state = 'rated';
+            out.region = 'III';
             const t = (v - m.ratedWind) / (m.cutOut - m.ratedWind);
-            if (m.kind === 'hawt') out.pitchDeg = lerp(0, 25, t);
+            // Region III: rotor speed is held at rated; pitch sheds exactly the surplus power
+            if (m.kind === 'hawt') out.pitchDeg = pitchAboveRated(m, v, out.omega, out.cp);
             if (m.kind === 'small') out.furlDeg = lerp(0, 55, t);
         } else {
             out.state = 'generating';
+            out.region = 'II';
         }
         return out;
+    }
+
+    /** What the same rotor would deliver with blades fixed at 0 deg (no pitch control). */
+    function unregulatedPowerW(m, v) {
+        if (v < m.cutIn) return 0;
+        const omega = m.tsr * Math.min(v, m.ratedWind) / m.R;
+        return cpOf(m, omega * m.R / v, 0) * 0.5 * RHO * m.area * v * v * v * m.eff;
+    }
+
+    /*  Blade-element view at 75 % of the radius: velocity triangle,
+        inflow angle phi, angle of attack alpha = phi - beta - twist. */
+    function aeroOf(m, op, pitchDeg) {
+        const f = sectionFlow(m, op.v, op.omega, op.cp);
+        const twist = twistOf(m);
+        const beta = pitchDeg === undefined ? op.pitchDeg : pitchDeg;
+        const alpha = f.phi - beta - twist;
+        const c = clcd(alpha);
+        return { r: f.r, a: f.a, vAx: f.vAx, vRot: f.vRot, W: f.W, phi: f.phi, twist: twist, beta: beta, alpha: alpha, cl: c.cl, cd: c.cd };
     }
 
     function meanWindOf(m, site) { return SITES[site].ref * Math.pow(m.hubH / 100, SITES[site].alpha); }
@@ -215,6 +298,14 @@
             family: 'turbine', group: 'exterior', rel: 0.4, view: [0.9, 1.2], avail: (c) => !off(c) && c.m.kind !== 'small',
             name: () => 'Transformer',
             desc: () => 'The generator delivers about 690 V. A transformer steps it up to the 20–36 kV collector network to cut I²R losses. On land it often stands beside the tower; offshore it is built into the nacelle or tower base.'
+        },
+        pitch: {
+            family: 'turbine', group: 'interior', rel: 0.5, view: [0.95, 1.38], avail: isHawt,
+            name: () => 'Pitch system',
+            desc: (c) => {
+                const op = operatingPoint(c.m, Math.max(c.m.ratedWind + 6, 16));
+                return 'Each blade sits on a large pitch bearing at its root, and an electric motor (or hydraulic cylinder) inside the hub turns it about its long axis. Below rated wind the blades stay at about 0°, where the angle of attack gives the most lift and the rotor tracks its best tip-speed ratio. Above rated wind the controller holds the rotor speed and turns the blades towards feather: the angle of attack falls, lift falls, and the output stays at rated power. At ' + fmtN(op.v) + ' m/s this ' + c.m.short + ' needs about ' + fmtN(op.pitchDeg) + '° of pitch. Turning all three blades to 90° (feathering) is the main brake, so each pitch drive has its own battery or hydraulic accumulator to feather the blade even if the grid fails. Blades turn at up to about 8–10° per second, and modern turbines pitch each blade individually to smooth out loads from wind shear and turbulence.';
+            }
         },
         shaft: {
             family: 'turbine', group: 'interior', rel: 0.35, view: [1.3, 1.32], avail: (c) => c.m.drive === 'geared' && c.m.kind === 'hawt',
@@ -334,6 +425,7 @@
             { part: 'gearbox', mode: 'inside', title: 'The gearbox raises the speed', text: 'Gear stages speed the rotation up to about 1,500 rpm for the generator.' },
             { part: 'generator', mode: 'inside', title: 'The generator induces current', text: 'Magnets sweeping past copper windings change the magnetic flux, and by Faraday’s law this induces an AC voltage.' },
             { part: 'converter', mode: 'inside', title: 'Power electronics tame it', text: 'The converter fixes the frequency at 50 Hz while the rotor speed follows the wind.' },
+            { part: 'pitch', mode: 'inside', title: 'Pitch control caps the power', text: 'Above rated wind the blades turn towards feather, cutting the angle of attack and the lift so the output stays at rated power.' },
             { part: 'transformer', mode: 'exterior', title: 'A transformer raises the voltage', text: 'From about 690 V up to the 20–36 kV collector network, to reduce losses.' },
             { part: 'collector', mode: 'grid', title: 'Cables collect the farm’s power', text: 'Underground cables carry every turbine’s output to the farm substation.' },
             { part: 'onsub', mode: 'grid', title: 'Into the grid', text: 'The substation raises the voltage again and feeds the transmission grid.' }
@@ -341,6 +433,7 @@
         offshore: [
             { part: 'blade', mode: 'exterior', title: 'Strong sea winds turn the rotor', text: 'Smooth water means strong, steady wind even low above the waves.' },
             { part: 'generator', mode: 'inside', title: 'The generator makes AC power', text: 'Rotating magnets induce a voltage in the copper windings.' },
+            { part: 'pitch', mode: 'inside', title: 'Pitch control caps the power', text: 'In strong sea winds the blades pitch towards feather so the turbine never exceeds its rated power.' },
             { part: 'foundation', mode: 'exterior', title: 'The foundation holds it at sea', text: 'Monopile, jacket or floating platform, depending on water depth.' },
             { part: 'arraycable', mode: 'exterior', title: 'An array cable runs to the seabed', text: 'From the transition piece or platform down to a cable buried in the seabed.' },
             { part: 'array', mode: 'grid', title: 'Strings of turbines are linked', text: '66 kV inter-array cables join turbines in strings to the offshore substation.' },
@@ -355,7 +448,8 @@
         idle: 'Idling: wind is below the cut-in speed',
         generating: 'Generating: the rotor tracks its optimum tip-speed ratio',
         rated: 'Rated power reached',
-        parked: 'Storm shutdown: wind above the cut-out speed'
+        parked: 'Storm shutdown: wind above the cut-out speed',
+        estop: 'Emergency stop: the rotor is braking to a standstill'
     };
 
     // ============================================================
@@ -363,7 +457,7 @@
     // ============================================================
     const ui = {
         selected: null, mode: 'exterior', tour: -1, windBase: 8, labels: true, hover: null,
-        model: 'geared', site: 'onshore', foundation: 'monopile', link: 'hvac'
+        model: 'geared', site: 'onshore', foundation: 'monopile', link: 'hvac', estop: false
     };
     const cfg = () => ({ m: MODELS[ui.model], site: ui.site, foundation: ui.foundation, link: ui.link });
     let viewer = null;
@@ -418,7 +512,7 @@
 
     function renderHud() {
         const m = MODELS[ui.model];
-        const op = operatingPoint(m, ui.windBase);
+        const op = operatingPoint(m, ui.windBase, ui.estop);
         const y = yieldOf(m, ui.site);
         setText(hud.windMean, fmt(ui.windBase, 1));
         setText(hud.wind, fmt(op.v, 1) + ' m/s');
@@ -440,7 +534,8 @@
         if (hud.bar) hud.bar.style.width = (op.powerW / (m.ratedKw * 1000) * 100).toFixed(1) + '%';
         if (hud.status) {
             let text = STATUS_TEXT[op.state];
-            if (op.state === 'rated') text += m.kind === 'hawt' ? ': blades pitch to shed the excess' : m.kind === 'small' ? ': the tail furls the rotor out of the wind' : ': blades stall to limit power';
+            if (op.state === 'rated') text += m.kind === 'hawt' ? ': pitch setpoint ' + fmt(op.pitchDeg, 0) + '° holds it there' : m.kind === 'small' ? ': the tail furls the rotor out of the wind' : ': blades stall to limit power';
+            if (op.state === 'estop') text += m.kind === 'hawt' ? ', all blades feathered to 90°' : m.kind === 'small' ? ', rotor furled out of the wind' : ', mechanical brake applied';
             if (op.state === 'parked' && m.kind === 'hawt') text += ', blades feathered to 90°';
             hud.status.textContent = text;
             hud.status.dataset.state = op.state;
@@ -451,8 +546,416 @@
         if (hud.scaleIn) { hud.scaleIn.style.left = pos(m.cutIn); hud.scaleIn.textContent = 'cut-in ' + fmt(m.cutIn, m.cutIn % 1 ? 1 : 0); }
         if (hud.scaleRated) { hud.scaleRated.style.left = pos(m.ratedWind); hud.scaleRated.textContent = 'rated ' + fmt(m.ratedWind, 1); }
         if (hud.scaleOut) { hud.scaleOut.style.left = pos(m.cutOut); hud.scaleOut.textContent = 'cut-out ' + m.cutOut; }
+        renderPitchCard(op, viewer && viewer.pitchDeg ? viewer.pitchDeg() : undefined);
         return op;
     }
+
+    // ============================================================
+    //  Pitch regulation card (SVG, works with or without WebGL)
+    //  - blade section at 75 % span: velocity triangle, beta, alpha,
+    //    lift, drag and the in-plane driving force
+    //  - two charts on one wind-speed axis: power (with / without
+    //    pitch control) and blade pitch angle, with the four regions
+    // ============================================================
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const pc = {
+        root: $('.wd-pitch'), details: el('wd-pitch-details'), body: $('.wd-pitch-body'), note: el('wd-pitch-note'),
+        af: el('wd-airfoil'), pw: el('wd-chart-power'), pt: el('wd-chart-pitch'), tip: el('wd-tip'),
+        tableBody: el('wd-table-body'), curves: $('.wd-curves'),
+        beta: el('wd-beta'), alpha: el('wd-alpha'), alphaSub: el('wd-alpha-sub'), lam: el('wd-lambda'),
+        cpv: el('wd-cp'), region: el('wd-region'), regionSub: el('wd-region-sub'),
+        estopBtn: $('[data-action="estop"]'), sweepBtn: $('[data-action="sweep"]'),
+        pTitle: el('wd-power-title')
+    };
+    function svgEl(tag, attrs, parent) {
+        const n = document.createElementNS(SVGNS, tag);
+        if (attrs) Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k]));
+        if (parent) parent.appendChild(n);
+        return n;
+    }
+    function svgText(parent, x, y, text, cls, anchor) {
+        const t = svgEl('text', { x: x, y: y, class: cls || 'wd-t', 'text-anchor': anchor || 'start' }, parent);
+        t.textContent = text;
+        return t;
+    }
+    const REGION_TEXT = {
+        I: ['Region I', 'below cut-in: too little wind, rotor idles'],
+        II: ['Region II', 'blades at 0°, rotor tracks the best tip-speed ratio'],
+        III: ['Region III', 'rated power held by pitching the blades'],
+        IV: ['Region IV', 'storm: blades feathered to 90°, rotor parked'],
+        stop: ['Emergency stop', 'all blades feathering at full pitch rate']
+    };
+
+    // ---- Blade-section diagram -----------------------------------
+    const AF = { cx: 248, cy: 132, chord: 100 };
+    const afParts = {};
+    function airfoilPath() {
+        // NACA 4412-like section, quarter chord at the origin, math y up (flipped for SVG)
+        const pts = [];
+        const N = 36;
+        const m = 0.04;
+        const p = 0.4;
+        const up = [];
+        const lo = [];
+        for (let i = 0; i <= N; i++) {
+            const x = (1 - Math.cos(Math.PI * i / N)) / 2;
+            const yt = 0.6 * (0.2969 * Math.sqrt(x) - 0.126 * x - 0.3516 * x * x + 0.2843 * x * x * x - 0.1015 * x * x * x * x);
+            const yc = x < p ? m / (p * p) * (2 * p * x - x * x) : m / ((1 - p) * (1 - p)) * ((1 - 2 * p) + 2 * p * x - x * x);
+            up.push([(x - 0.25) * AF.chord, -(yc + yt) * AF.chord]);
+            lo.push([(x - 0.25) * AF.chord, -(yc - yt) * AF.chord]);
+        }
+        up.forEach(q => pts.push(q));
+        lo.reverse().forEach(q => pts.push(q));
+        return 'M' + pts.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join('L') + 'Z';
+    }
+    function buildAirfoil() {
+        if (!pc.af) return;
+        const s = pc.af;
+        s.innerHTML = '';
+        const defs = svgEl('defs', null, s);
+        [['wind', '#8fd3ff'], ['rot', '#b9bec6'], ['rel', '#ffffff'], ['lift', '#66bb6a'], ['drag', '#ef5350'], ['drive', '#ffc107']].forEach(d => {
+            const mk = svgEl('marker', { id: 'wd-arrow-' + d[0], viewBox: '0 0 10 10', refX: '8.5', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' }, defs);
+            svgEl('path', { d: 'M0,1 L10,5 L0,9 Z', fill: d[1] }, mk);
+        });
+        // Rotor plane and directions
+        svgEl('line', { x1: 10, y1: AF.cy, x2: 350, y2: AF.cy, class: 'wd-plane' }, s);
+        svgText(s, 10, AF.cy - 6, 'rotor plane', 'wd-t wd-t-muted');
+        // Angle key (keeps the small arcs free of text)
+        svgEl('path', { d: 'M262,64 a10,10 0 0 1 10,10', class: 'wd-arc wd-arc-beta' }, s);
+        svgEl('path', { d: 'M262,82 a10,10 0 0 1 10,10', class: 'wd-arc wd-arc-alpha' }, s);
+        svgEl('line', { x1: 78, y1: 18, x2: 22, y2: 18, class: 'wd-dir', 'marker-end': 'url(#wd-arrow-rot)' }, s);
+        svgText(s, 84, 22, 'blade moves this way', 'wd-t wd-t-muted');
+        svgEl('line', { x1: 344, y1: 52, x2: 344, y2: 20, class: 'wd-dir', 'marker-end': 'url(#wd-arrow-wind)', stroke: '#8fd3ff' }, s);
+        svgText(s, 336, 30, 'wind', 'wd-t wd-t-muted', 'end');
+        // Angle arcs
+        afParts.betaArc = svgEl('path', { class: 'wd-arc wd-arc-beta' }, s);
+        afParts.alphaArc = svgEl('path', { class: 'wd-arc wd-arc-alpha' }, s);
+        afParts.betaLbl = svgText(s, 0, 0, 'β', 'wd-t wd-t-beta', 'middle');
+        afParts.alphaLbl = svgText(s, 0, 0, 'α', 'wd-t wd-t-alpha', 'middle');
+        // Chord line + airfoil
+        afParts.foil = svgEl('g', null, s);
+        svgEl('path', { d: airfoilPath(), class: 'wd-foil' }, afParts.foil);
+        svgEl('line', { x1: -0.25 * AF.chord - 10, y1: 0, x2: 0.75 * AF.chord + 22, y2: 0, class: 'wd-chord' }, afParts.foil);
+        // Velocity triangle and forces
+        afParts.wind = svgEl('line', { class: 'wd-vec', stroke: '#8fd3ff', 'marker-end': 'url(#wd-arrow-wind)' }, s);
+        afParts.rot = svgEl('line', { class: 'wd-vec wd-vec-dash', stroke: '#b9bec6', 'marker-end': 'url(#wd-arrow-rot)' }, s);
+        afParts.rel = svgEl('line', { class: 'wd-vec wd-vec-strong', stroke: '#ffffff', 'marker-end': 'url(#wd-arrow-rel)' }, s);
+        afParts.lift = svgEl('line', { class: 'wd-vec wd-vec-strong', stroke: '#66bb6a', 'marker-end': 'url(#wd-arrow-lift)' }, s);
+        afParts.drag = svgEl('line', { class: 'wd-vec', stroke: '#ef5350', 'marker-end': 'url(#wd-arrow-drag)' }, s);
+        afParts.drive = svgEl('line', { class: 'wd-vec wd-vec-strong', stroke: '#ffc107', 'marker-end': 'url(#wd-arrow-drive)' }, s);
+        afParts.windLbl = svgText(s, 0, 0, '', 'wd-t');
+        afParts.rotLbl = svgText(s, 0, 0, '', 'wd-t');
+        afParts.relLbl = svgText(s, 0, 0, '', 'wd-t');
+        afParts.liftLbl = svgText(s, 0, 0, 'lift', 'wd-t');
+        afParts.dragLbl = svgText(s, 0, 0, 'drag ×10', 'wd-t');
+        afParts.driveLbl = svgText(s, 0, 0, 'driving force', 'wd-t');
+        afParts.stopLbl = svgText(s, 180, 250, '', 'wd-t wd-t-muted', 'middle');
+    }
+    function setLine(n, x1, y1, x2, y2, show) {
+        n.setAttribute('x1', x1.toFixed(1));
+        n.setAttribute('y1', y1.toFixed(1));
+        n.setAttribute('x2', x2.toFixed(1));
+        n.setAttribute('y2', y2.toFixed(1));
+        n.style.display = show ? '' : 'none';
+    }
+    function placeText(n, x, y, text, show) {
+        n.setAttribute('x', x.toFixed(1));
+        n.setAttribute('y', y.toFixed(1));
+        if (text !== null) n.textContent = text;
+        n.style.display = show ? '' : 'none';
+    }
+    function arcPath(r, a0, a1) {
+        // math angles in degrees (counter-clockwise from +x), drawn around the quarter chord
+        const p0 = [AF.cx + r * Math.cos(a0 * Math.PI / 180), AF.cy - r * Math.sin(a0 * Math.PI / 180)];
+        const p1 = [AF.cx + r * Math.cos(a1 * Math.PI / 180), AF.cy - r * Math.sin(a1 * Math.PI / 180)];
+        const large = Math.abs(a1 - a0) > 180 ? 1 : 0;
+        const sweep = a1 > a0 ? 0 : 1;
+        return 'M' + p0[0].toFixed(1) + ',' + p0[1].toFixed(1) + ' A' + r + ',' + r + ' 0 ' + large + ' ' + sweep + ' ' + p1[0].toFixed(1) + ',' + p1[1].toFixed(1);
+    }
+    function renderAirfoil(m, op, pitchDeg) {
+        if (!pc.af || !afParts.foil) return;
+        const ae = aeroOf(m, op, pitchDeg);
+        const theta = ae.beta + ae.twist;                         // chord angle above the rotor plane
+        afParts.foil.setAttribute('transform', 'translate(' + AF.cx + ',' + AF.cy + ') rotate(' + (-theta).toFixed(2) + ')');
+        const omegaRated = m.tsr * m.ratedWind / m.R;
+        const Wref = Math.hypot(omegaRated * ae.r, m.ratedWind * 0.67);
+        const k = 150 / Math.hypot(omegaRated * ae.r, m.cutOut);
+        const moving = ae.W > 0.2 && op.omega > 0.01;
+        const rad = Math.PI / 180;
+        // Velocity triangle ending at the leading edge: wind up, blade speed along the rotor plane
+        const le = [AF.cx - 0.25 * AF.chord * Math.cos(theta * rad), AF.cy + 0.25 * AF.chord * Math.sin(theta * rad)];
+        const start = [le[0] - ae.vRot * k, le[1] + ae.vAx * k];
+        const corner = [start[0], le[1]];
+        setLine(afParts.wind, start[0], start[1], corner[0], corner[1] + 1, moving && ae.vAx > 0.2);
+        setLine(afParts.rot, corner[0], corner[1], le[0] - 3, le[1], moving);
+        setLine(afParts.rel, start[0], start[1], le[0] - 2, le[1] + 2, moving);
+        placeText(afParts.windLbl, start[0] - 5, (start[1] + corner[1]) / 2 + 4, fmt(ae.vAx, 1) + ' m/s', moving && ae.vAx > 0.2);
+        afParts.windLbl.setAttribute('text-anchor', 'end');
+        placeText(afParts.rotLbl, (corner[0] + le[0]) / 2, corner[1] - 7, 'blade speed ' + fmt(ae.vRot, 0) + ' m/s', moving);
+        afParts.rotLbl.setAttribute('text-anchor', 'middle');
+        const midW = [(start[0] + le[0]) / 2, (start[1] + le[1]) / 2];
+        placeText(afParts.relLbl, midW[0] + 6, midW[1] + 18, 'relative wind W ' + fmt(ae.W, 0) + ' m/s', moving);
+        // Forces at the quarter chord (lift ⟂ W, drag ∥ W), scaled with dynamic pressure
+        const phi = ae.phi * rad;
+        const q = moving ? Math.pow(ae.W / Wref, 2) : 0;
+        const L = ae.cl * q * 95;
+        const D = ae.cd * q * 95 * 10;
+        const lift = [-Math.sin(phi) * L, Math.cos(phi) * L];
+        const drag = [Math.cos(phi) * D, Math.sin(phi) * D];
+        const drive = -(ae.cl * Math.sin(phi) - ae.cd * Math.cos(phi)) * q * 95 * 13;    // in-plane, towards the blade's motion
+        setLine(afParts.lift, AF.cx, AF.cy, AF.cx + lift[0], AF.cy - lift[1], moving && Math.abs(L) > 3);
+        setLine(afParts.drag, AF.cx, AF.cy, AF.cx + drag[0], AF.cy - drag[1], moving && D > 3);
+        const dy = 236;
+        setLine(afParts.drive, AF.cx, dy, AF.cx + drive, dy, moving && Math.abs(drive) > 2);
+        placeText(afParts.liftLbl, AF.cx + lift[0] - 6, AF.cy - lift[1] + 4, 'lift', moving && Math.abs(L) > 3);
+        afParts.liftLbl.setAttribute('text-anchor', 'end');
+        placeText(afParts.dragLbl, AF.cx + drag[0] + 4, AF.cy - drag[1] + 14, null, moving && D > 3);
+        placeText(afParts.driveLbl, AF.cx + drive / 2, dy - 8, null, moving && Math.abs(drive) > 2);
+        afParts.driveLbl.setAttribute('text-anchor', 'middle');
+        // beta: rotor plane -> chord ; alpha: chord -> incoming relative wind (both on the leading-edge side)
+        const showB = Math.abs(ae.beta) > 0.6;
+        afParts.betaArc.setAttribute('d', arcPath(40, 180, 180 + Math.max(0.5, theta)));
+        afParts.betaArc.style.display = showB ? '' : 'none';
+        const midB = (180 + theta / 2) * rad;
+        void midB;
+        placeText(afParts.betaLbl, 278, 74, 'pitch β = ' + fmt(ae.beta, 0) + '°', true);
+        afParts.betaLbl.setAttribute('text-anchor', 'start');
+        const showA = moving && Math.abs(ae.alpha) > 0.6;
+        afParts.alphaArc.setAttribute('d', arcPath(64, 180 + theta, 180 + ae.phi));
+        afParts.alphaArc.style.display = showA ? '' : 'none';
+        const midA = (180 + (theta + ae.phi) / 2) * rad;
+        void midA;
+        placeText(afParts.alphaLbl, 278, 92, moving ? 'attack α = ' + fmt(Math.abs(ae.alpha) < 0.05 ? 0 : ae.alpha, 1) + '°' : 'attack α: –', true);
+        afParts.alphaLbl.setAttribute('text-anchor', 'start');
+        placeText(afParts.stopLbl, 180, 250, op.state === 'estop' ? 'Blades feathered: no lift, the rotor brakes' : op.v < m.cutIn ? 'Too little wind to turn the rotor' : op.state === 'parked' ? 'Storm: blades feathered, rotor parked' : '', !moving);
+        return ae;
+    }
+
+    buildAirfoil();
+
+    // ---- Charts: power and pitch on a shared wind axis ---------------
+    const CH = { w: 440, h: 168, l: 46, r: 14, t: 16, b: 26, vmax: 30 };
+    const charts = { model: null, data: [], pMax: 1, unit: 'MW', div: 1e6 };
+    const xOf = (v) => CH.l + v / CH.vmax * (CH.w - CH.l - CH.r);
+    function niceStep(range, target) {
+        const raw = range / target;
+        const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+        const n = raw / mag;
+        return (n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10) * mag;
+    }
+    function chartFrame(svg, yMax, yStep, yFmt, title) {
+        svg.innerHTML = '';
+        const yOf = (y) => CH.h - CH.b - y / yMax * (CH.h - CH.t - CH.b);
+        const m = MODELS[ui.model];
+        // Regions as quiet bands with names (never status colours)
+        const bands = [[0, m.cutIn, 'I'], [m.cutIn, m.ratedWind, 'II'], [m.ratedWind, m.cutOut, 'III'], [m.cutOut, CH.vmax, 'IV']];
+        bands.forEach((b, i) => {
+            svgEl('rect', { x: xOf(b[0]), y: CH.t, width: Math.max(0, xOf(b[1]) - xOf(b[0])), height: CH.h - CH.t - CH.b, class: i % 2 ? 'wd-band wd-band-alt' : 'wd-band' }, svg);
+            if (xOf(b[1]) - xOf(b[0]) > 14) svgText(svg, (xOf(b[0]) + xOf(b[1])) / 2, CH.t + 11, b[2], 'wd-t wd-t-region', 'middle');
+        });
+        for (let y = 0; y <= yMax + 1e-9; y += yStep) {
+            svgEl('line', { x1: CH.l, x2: CH.w - CH.r, y1: yOf(y), y2: yOf(y), class: 'wd-grid' }, svg);
+            svgText(svg, CH.l - 6, yOf(y) + 3.5, yFmt(y), 'wd-t wd-t-axis', 'end');
+        }
+        for (let v = 0; v <= CH.vmax; v += 5) svgText(svg, xOf(v), CH.h - CH.b + 15, String(v), 'wd-t wd-t-axis', 'middle');
+        svgEl('line', { x1: CH.l, x2: CH.w - CH.r, y1: CH.h - CH.b, y2: CH.h - CH.b, class: 'wd-axis' }, svg);
+        svgText(svg, CH.w - CH.r, CH.h - 2, 'wind speed (m/s)', 'wd-t wd-t-axis', 'end');
+        svgText(svg, CH.l, 10, title, 'wd-t wd-t-axis');
+        return yOf;
+    }
+    function polyline(svg, pts, cls) {
+        return svgEl('polyline', { points: pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), class: cls }, svg);
+    }
+    function buildPitchCharts() {
+        const m = MODELS[ui.model];
+        if (!pc.pw || !pc.pt) return;
+        if (m.kind !== 'hawt') return;
+        charts.model = m.id;
+        const big = m.ratedKw >= 1000;
+        charts.div = big ? 1e6 : 1e3;
+        charts.unit = big ? 'MW' : 'kW';
+        const data = [];
+        for (let v = 0; v <= CH.vmax + 1e-9; v += 0.25) {
+            const op = operatingPoint(m, v);
+            data.push({ v: v, p: op.powerW / charts.div, u: unregulatedPowerW(m, v) / charts.div, b: op.pitchDeg });
+        }
+        charts.data = data;
+        const rated = m.ratedKw * 1000 / charts.div;
+        const yMaxP = Math.ceil(Math.max.apply(null, data.map(d => d.u)) / rated * 2) / 2 * rated;
+        charts.pMax = yMaxP;
+        const yOfP = chartFrame(pc.pw, yMaxP, niceStep(yMaxP, 4), (y) => fmt(y, y % 1 ? 1 : 0), 'Power (' + charts.unit + ')');
+        svgEl('line', { x1: CH.l, x2: CH.w - CH.r, y1: yOfP(rated), y2: yOfP(rated), class: 'wd-ref' }, pc.pw);
+        svgText(pc.pw, CH.l + 4, yOfP(rated) - 4, 'rated ' + fmt(rated, rated % 1 ? 1 : 0) + ' ' + charts.unit, 'wd-t wd-t-muted');
+        polyline(pc.pw, data.map(d => [xOf(d.v), yOfP(d.u)]), 'wd-line wd-line-2');
+        polyline(pc.pw, data.map(d => [xOf(d.v), yOfP(d.p)]), 'wd-line wd-line-1');
+        // selective direct labels
+        const peak = data.reduce((a, d) => (d.u > a.u ? d : a), data[0]);
+        svgText(pc.pw, xOf(peak.v), yOfP(peak.u) - 7, 'without pitch control', 'wd-t', 'middle');
+        svgText(pc.pw, xOf((m.ratedWind + m.cutOut) / 2), yOfP(rated) + 13, 'with pitch control', 'wd-t', 'middle');
+        const yMaxB = Math.ceil((Math.max.apply(null, data.filter(d => d.v < m.cutOut).map(d => d.b)) + 4) / 10) * 10;
+        charts.bMax = yMaxB;
+        const yOfB = chartFrame(pc.pt, yMaxB, 10, (y) => y + '°', 'Blade pitch β (°)');
+        const pts = data.map(d => [xOf(d.v), yOfB(Math.min(d.b, yMaxB))]);
+        polyline(pc.pt, pts, 'wd-line wd-line-1');
+        svgText(pc.pt, (xOf(m.cutOut) + xOf(CH.vmax)) / 2, CH.t + 26, '→ 90° feathered', 'wd-t', 'middle');
+        // Operating-point markers and crosshair (updated live)
+        charts.cross = [pc.pw, pc.pt].map(s => svgEl('line', { y1: CH.t, y2: CH.h - CH.b, class: 'wd-cross' }, s));
+        charts.dotP = svgEl('circle', { r: 5, class: 'wd-dot' }, pc.pw);
+        charts.dotB = svgEl('circle', { r: 5, class: 'wd-dot' }, pc.pt);
+        charts.yOfP = yOfP;
+        charts.yOfB = yOfB;
+        charts.cross.forEach(c => { c.style.display = 'none'; });
+        // Table view
+        if (pc.tableBody) {
+            pc.tableBody.innerHTML = '';
+            for (let v = 0; v <= CH.vmax; v += 1) {
+                const d = data[Math.round(v / 0.25)];
+                const tr = document.createElement('tr');
+                [fmt(v, 0), fmt(d.p, big ? 2 : 1), fmt(d.u, big ? 2 : 1), fmt(d.b, 0) + '°'].forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                pc.tableBody.appendChild(tr);
+            }
+        }
+        if (pc.pTitle) pc.pTitle.textContent = m.short;
+    }
+    function markOperatingPoint(op) {
+        if (!charts.dotP || charts.model !== ui.model) return;
+        const vv = Math.min(op.v, CH.vmax);
+        const p = op.powerW / charts.div;
+        charts.dotP.setAttribute('cx', xOf(vv).toFixed(1));
+        charts.dotP.setAttribute('cy', charts.yOfP(p).toFixed(1));
+        charts.dotB.setAttribute('cx', xOf(vv).toFixed(1));
+        charts.dotB.setAttribute('cy', charts.yOfB(Math.min(op.pitchDeg, charts.bMax)).toFixed(1));
+    }
+    // Crosshair + tooltip (pointer and keyboard)
+    let crossV = null;
+    function showCross(v) {
+        if (!charts.data.length || !pc.tip) return;
+        crossV = clamp(Math.round(v * 4) / 4, 0, CH.vmax);
+        const d = charts.data[Math.round(crossV / 0.25)];
+        charts.cross.forEach(c => {
+            c.setAttribute('x1', xOf(crossV).toFixed(1));
+            c.setAttribute('x2', xOf(crossV).toFixed(1));
+            c.style.display = '';
+        });
+        pc.tip.innerHTML = '';
+        const head = document.createElement('div');
+        head.className = 'wd-tip-head';
+        head.textContent = 'Wind ' + fmt(crossV, crossV % 1 ? 2 : 0) + ' m/s';
+        pc.tip.appendChild(head);
+        [['wd-key-1', fmt(d.p, charts.unit === 'MW' ? 2 : 1) + ' ' + charts.unit, 'with pitch control'],
+        ['wd-key-2', fmt(d.u, charts.unit === 'MW' ? 2 : 1) + ' ' + charts.unit, 'without pitch control'],
+        ['wd-key-1', fmt(d.b, 0) + '°', 'blade pitch']].forEach(r => {
+            const row = document.createElement('div');
+            row.className = 'wd-tip-row';
+            const key = document.createElement('i');
+            key.className = r[0];
+            const val = document.createElement('strong');
+            val.textContent = r[1];
+            const lab = document.createElement('span');
+            lab.textContent = r[2];
+            row.appendChild(key);
+            row.appendChild(val);
+            row.appendChild(lab);
+            pc.tip.appendChild(row);
+        });
+        pc.tip.hidden = false;
+        const box = pc.curves.getBoundingClientRect();
+        const svgBox = pc.pw.getBoundingClientRect();
+        const px = svgBox.left - box.left + xOf(crossV) / CH.w * svgBox.width;
+        const left = px + 12 + pc.tip.offsetWidth > box.width ? px - 12 - pc.tip.offsetWidth : px + 12;
+        pc.tip.style.left = Math.max(0, left) + 'px';
+        pc.tip.style.top = (svgBox.top - box.top + 18) + 'px';
+    }
+    function hideCross() {
+        crossV = null;
+        if (charts.cross) charts.cross.forEach(c => { c.style.display = 'none'; });
+        if (pc.tip) pc.tip.hidden = true;
+    }
+    [pc.pw, pc.pt].forEach(svg => {
+        if (!svg) return;
+        svg.addEventListener('pointermove', (e) => {
+            const r = svg.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width * CH.w;
+            showCross((x - CH.l) / (CH.w - CH.l - CH.r) * CH.vmax);
+        });
+        svg.addEventListener('pointerleave', hideCross);
+    });
+    if (pc.curves) {
+        pc.curves.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+            e.preventDefault();
+            showCross((crossV === null ? ui.windBase : crossV) + (e.key === 'ArrowRight' ? 0.5 : -0.5));
+        });
+        pc.curves.addEventListener('focus', () => showCross(ui.windBase));
+        pc.curves.addEventListener('blur', hideCross);
+    }
+
+    function renderPitchCard(op, actualPitchDeg) {
+        if (!pc.root) return;
+        if (pc.details && !pc.details.open) return;            // collapsed until the reader asks for it
+        const m = MODELS[ui.model];
+        const hawt = m.kind === 'hawt';
+        if (pc.body) pc.body.hidden = !hawt;
+        if (pc.note) {
+            pc.note.hidden = hawt;
+            pc.note.textContent = m.kind === 'vawt'
+                ? 'This vertical-axis turbine has fixed blades and no pitch system. Above rated wind it relies on stall: the angle of attack grows so large that the flow separates from the blades and lift collapses, which caps the power more roughly than pitching does. Choose a horizontal-axis model to see pitch regulation.'
+                : 'This small turbine has fixed blades and no pitch system. In strong wind its hinged tail lets the rotor swing sideways out of the wind (furling), which limits power and protects it. Choose a horizontal-axis model to see pitch regulation.';
+        }
+        if (!hawt) return;
+        if (charts.model !== ui.model) buildPitchCharts();
+        const beta = actualPitchDeg === undefined ? op.pitchDeg : actualPitchDeg;
+        const ae = renderAirfoil(m, op, beta) || aeroOf(m, op, beta);
+        setText(pc.beta, fmt(beta, 0) + '°');
+        setText(pc.alpha, op.omega > 0.01 ? fmt(Math.abs(ae.alpha) < 0.05 ? 0 : ae.alpha, 1) + '°' : '–');
+        setText(pc.alphaSub, op.omega > 0.01 ? (ae.alpha > 12 ? 'stalled' : 'lift coefficient ' + fmt(ae.cl, 2)) : 'rotor stopped');
+        setText(pc.lam, op.tsr > 0 ? fmt(op.tsr, 1) : '–');
+        setText(pc.cpv, fmt(op.cp, 2));
+        const rt = REGION_TEXT[op.region] || REGION_TEXT.I;
+        setText(pc.region, rt[0]);
+        setText(pc.regionSub, rt[1]);
+        $$('.wd-regions li').forEach(li => li.classList.toggle('is-active', li.dataset.region === op.region));
+        markOperatingPoint(op);
+    }
+
+    // ---- Wind sweep and emergency stop ---------------------------------
+    let sweepTimer = 0;
+    function setBtn(btn, on, onText, offText, onIcon, offIcon) {
+        if (!btn) return;
+        btn.setAttribute('aria-pressed', String(on));
+        const label = btn.querySelector('span');
+        const icon = btn.querySelector('i');
+        if (label) label.textContent = on ? onText : offText;
+        if (icon) icon.className = 'fas ' + (on ? onIcon : offIcon);
+    }
+    function stopSweep() {
+        if (!sweepTimer) return;
+        window.clearInterval(sweepTimer);
+        sweepTimer = 0;
+        setBtn(pc.sweepBtn, false, 'Stop sweep', 'Sweep wind 0→30 m/s', 'fa-stop', 'fa-wind');
+    }
+    function startSweep() {
+        stopSweep();
+        ui.windBase = 0;
+        setBtn(pc.sweepBtn, true, 'Stop sweep', 'Sweep wind 0→30 m/s', 'fa-stop', 'fa-wind');
+        sweepTimer = window.setInterval(() => {
+            ui.windBase = Math.min(30, ui.windBase + 0.25);
+            if (slider) slider.value = String(ui.windBase);
+            renderHud();
+            if (ui.windBase >= 30) stopSweep();
+        }, 250);
+    }
+    if (pc.details) pc.details.addEventListener('toggle', () => { if (pc.details.open) renderHud(); else hideCross(); });
+    if (pc.sweepBtn) pc.sweepBtn.addEventListener('click', () => { if (sweepTimer) stopSweep(); else startSweep(); });
+    if (pc.estopBtn) pc.estopBtn.addEventListener('click', () => {
+        ui.estop = !ui.estop;
+        setBtn(pc.estopBtn, ui.estop, 'Restart turbine', 'Emergency stop', 'fa-redo', 'fa-hand-paper');
+        renderHud();
+    });
 
     // ---- configuration controls ----
     function syncConfigButtons() {
@@ -643,7 +1146,7 @@
     if (info.close) info.close.addEventListener('click', () => { stopTour(); select(null); });
     if (slider) {
         ui.windBase = parseFloat(slider.value) || ui.windBase;
-        slider.addEventListener('input', () => { ui.windBase = parseFloat(slider.value); renderHud(); });
+        slider.addEventListener('input', () => { stopSweep(); ui.windBase = parseFloat(slider.value); renderHud(); });
     }
     $$('button[data-site]').forEach(b => b.addEventListener('click', () => {
         if (ui.site === b.dataset.site) return;
@@ -790,7 +1293,10 @@
         const rockMat = std({ color: 0x6f6a64, roughness: 1 });
         const subCableMat = std({ color: 0x1b1f24, roughness: 0.6 });
         const concreteMat = std({ color: 0xbfbab2, roughness: 0.9 });
-        const xrayMats = [housingMat, towerMat, bladeMat];
+        const hubMat = std({ color: 0xf3f5f8, metalness: 0.15, roughness: 0.42 });
+        const xrayMats = [housingMat, towerMat, bladeMat, hubMat];
+        const gaugeMat = new THREE.MeshBasicMaterial({ color: 0xffc107, side: THREE.DoubleSide, transparent: true, opacity: 0.9, depthTest: false });
+        const needleMat = new THREE.MeshBasicMaterial({ color: 0x66bb6a, depthTest: false });
 
         function mesh(geo, mat, opts) {
             const m = new THREE.Mesh(geo, mat);
@@ -1122,10 +1628,24 @@
             rotor.position.z = ROTOR_Z;
             nacelle.add(rotor);
             const hubGroup = new THREE.Group();
-            const hub = mesh(new THREE.SphereGeometry(direct ? 0.36 : 0.3, 28, 20), whiteMat);
+            const hub = mesh(new THREE.SphereGeometry(direct ? 0.36 : 0.3, 28, 20), hubMat);
             hub.scale.set(1, 1, 1.25);
             hubGroup.add(hub);
-            hubGroup.add(mesh(new THREE.ConeGeometry(direct ? 0.27 : 0.22, 0.42, 28), whiteMat, { position: V(0, 0, 0.42), rotation: E(Math.PI / 2, 0, 0) }));
+            hubGroup.add(mesh(new THREE.ConeGeometry(direct ? 0.27 : 0.22, 0.42, 28), hubMat, { position: V(0, 0, 0.42), rotation: E(Math.PI / 2, 0, 0) }));
+            // Pitch system inside the hub: one bearing, drive and backup battery per blade
+            const pitchSys = new THREE.Group();
+            for (let i = 0; i < 3; i++) {
+                const g = new THREE.Group();
+                g.rotation.z = (i * Math.PI * 2) / 3;
+                g.add(mesh(new THREE.TorusGeometry(0.15, 0.025, 8, 28), yellowMat, { position: V(0, 0.2, 0), rotation: E(Math.PI / 2, 0, 0) }));
+                g.add(mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.12, 12), darkMat, { position: V(0.1, 0.1, -0.05) }));
+                g.add(mesh(makeGearGeometry(9, 0.03, 0.02), steelMat, { position: V(0.1, 0.17, -0.05), rotation: E(Math.PI / 2, 0, 0) }));
+                g.add(mesh(new THREE.BoxGeometry(0.06, 0.05, 0.08), std({ color: 0x3f6fd8, metalness: 0.3, roughness: 0.5 }), { position: V(-0.09, 0.08, 0.06) }));
+                g.add(mesh(new THREE.SphereGeometry(0.01, 8, 6), ledMat, { position: V(-0.09, 0.11, 0.1) }));
+                pitchSys.add(g);
+            }
+            rotor.add(pitchSys);
+            addPart('pitch', pitchSys, (v) => nacelle.localToWorld(v.copy(rotor.position).add(V(0, 0.34, 0.12))), (v) => rotor.getWorldPosition(v));
             rotor.add(hubGroup);
             addPart('hub', hubGroup, (v) => nacelle.localToWorld(v.copy(rotor.position).add(V(0, 0, 0.5))), (v) => rotor.getWorldPosition(v));
             const bladeGeo = makeBladeGeometry(bladeLen);
@@ -1142,6 +1662,47 @@
                 pitchPivots.push(pp);
                 bladesGroup.add(pivot);
             }
+            // Pitch protractor on blade 1: fixed 0-90 deg arc, needle along the chord
+            const gauge = new THREE.Group();
+            const gaugePivot = bladesGroup.children[0];
+            gauge.position.y = 0.46;
+            const arc = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.44, 40, 1, 0, Math.PI / 2), gaugeMat);
+            arc.rotation.x = -Math.PI / 2;
+            arc.renderOrder = 5;
+            gauge.add(arc);
+            [0, 30, 60, 90].forEach(d => {
+                const a = d * Math.PI / 180;
+                const tick = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.012, 0.012), gaugeMat);
+                tick.position.set(Math.cos(a) * 0.47, 0, -Math.sin(a) * 0.47);
+                tick.rotation.y = a;
+                tick.renderOrder = 5;
+                gauge.add(tick);
+            });
+            const tickLbl0 = textSprite('0°', '#ffe082', 0.07);
+            tickLbl0.position.set(0.6, 0, 0);
+            gauge.add(tickLbl0);
+            const tickLbl90 = textSprite('90° feather', '#ffe082', 0.07);
+            tickLbl90.position.set(0, 0, -0.62);
+            gauge.add(tickLbl90);
+            gaugePivot.add(gauge);
+            const needle = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.022, 0.022), needleMat);
+            needle.geometry.translate(0.23, 0, 0);
+            needle.position.y = 0.46 - 0.22;
+            needle.renderOrder = 6;
+            pitchPivots[0].add(needle);
+            let betaSprite = null;
+            let betaShown = null;
+            function setGaugeValue(deg) {
+                const r = Math.round(deg);
+                if (r === betaShown) return;
+                betaShown = r;
+                if (betaSprite) { gauge.remove(betaSprite); betaSprite.material.map.dispose(); betaSprite.material.dispose(); }
+                betaSprite = textSprite('β = ' + r + '°', '#ffffff', 0.11);
+                betaSprite.position.set(0.45, 0.16, -0.35);
+                betaSprite.renderOrder = 7;
+                gauge.add(betaSprite);
+            }
+            setGaugeValue(0);
             rotor.add(bladesGroup);
             ex.push({ obj: rotor, base: rotor.position.clone(), delta: V(0, 0, 1.6) });
             addPart('blade', bladesGroup, (v) => nacelle.localToWorld(v.copy(rotor.position).add(V(-0.35 * bladeLen, 0.6 * bladeLen, 0))), (v) => rotor.getWorldPosition(v));
@@ -1158,7 +1719,8 @@
             const gen = genGroup;
             return {
                 group: root, scale: S, worldTop: hubUnits + m.R / U, hubY: hubUnits, nacelleNode: nacelle, rotorNode: rotor,
-                interior: interior, cableGroup: cableGroup, exploders: ex, gen: gen,
+                interior: interior, cableGroup: cableGroup, exploders: ex, gen: gen, pitchSys: pitchSys,
+                gauge: { group: gauge, needle: needle, set: setGaugeValue },
                 cableBottomWorld: () => t.localToWorld(cBot.clone()),
                 spin(angle) {
                     rotor.rotation.z = angle;
@@ -2127,6 +2689,7 @@
         let visible = true;
         let rafId = 0;
         let hudClock = 0;
+        const slowNote = el('wd-slowmo');
         let gust = 0;
         let gustGoal = 0;
         let nextGust = 3;
@@ -2156,7 +2719,7 @@
             }
             gust += (gustGoal - gust) * Math.min(1, dt * 0.5);
             const wind = Math.max(0, ui.windBase + gust * motionScale);
-            const op = operatingPoint(m, wind);
+            const op = operatingPoint(m, wind, ui.estop);
             hudClock += dt;
             if (hudClock > 0.15) {
                 hudClock = 0;
@@ -2166,13 +2729,28 @@
             }
 
             // Rotor: visual speed follows the physical angular speed (scaled for big, slow rotors)
-            const visScale = m.kind === 'small' ? 0.25 : m.kind === 'vawt' ? 0.8 : 1.5;
-            state.rotorOmegaVis += (op.omega * visScale * motionScale - state.rotorOmegaVis) * Math.min(1, dt * 0.8);
+            const gaugeOn = !!(T && T.gauge && (ui.selected === 'pitch' || ui.selected === 'hub') && state.grid < 0.5);
+            const slowMo = gaugeOn && !reduceMotion ? 0.15 : 1;            // slowed so the pitching can be watched
+            if (slowNote) slowNote.hidden = !(gaugeOn && op.omega > 0.01);
+            const visScale = (m.kind === 'small' ? 0.25 : m.kind === 'vawt' ? 0.8 : 1.5) * slowMo;
+            state.rotorOmegaVis += (op.omega * visScale * motionScale - state.rotorOmegaVis) * Math.min(1, dt * (ui.estop ? 0.35 : 0.8));
             state.rotorAngle -= state.rotorOmegaVis * dt;
             if (T) {
                 T.spin(state.rotorAngle);
-                state.pitch += (THREE.MathUtils.degToRad(op.pitchDeg) - state.pitch) * Math.min(1, dt * 1.2);
+                // Pitch drives move at a finite rate: about 8 deg/s, 12 deg/s when feathering for a stop
+                const rate = THREE.MathUtils.degToRad(ui.estop ? 12 : 8) * (reduceMotion ? 50 : 1);
+                const target = THREE.MathUtils.degToRad(op.pitchDeg);
+                const nowMs = performance.now();
+                const realDt = state.pitchClock ? Math.min(0.5, (nowMs - state.pitchClock) / 1000) : dt;   // real time, not frame-capped
+                state.pitchClock = nowMs;
+                state.pitch += clamp(target - state.pitch, -rate * realDt, rate * realDt);
                 T.setPitch(state.pitch);
+                if (T.gauge) {
+                    T.gauge.group.visible = gaugeOn;
+                    T.gauge.needle.visible = gaugeOn;
+                    if (gaugeOn) T.gauge.set(THREE.MathUtils.radToDeg(state.pitch));
+                }
+                if (T.pitchSys) T.pitchSys.visible = state.xray > 0.02 || state.explode > 0.02;
                 state.furl += (THREE.MathUtils.degToRad(op.furlDeg) - state.furl) * Math.min(1, dt * 1.0);
                 if (T.setFurl) T.setFurl(state.furl + Math.sin(t * 0.3) * 0.04 * motionScale);
                 else T.setYaw(YAW_MEAN + Math.sin(t * 0.18) * 0.06 * motionScale);
@@ -2264,6 +2842,7 @@
             housingMat.opacity = lerp(1, 0.1, x);
             towerMat.opacity = lerp(1, 0.22, x);
             bladeMat.opacity = lerp(1, 0.4, x);
+            hubMat.opacity = lerp(1, 0.15, x);
             if (T) {
                 T.interior.visible = x > 0.02 || state.explode > 0.02;
                 if (T.cableGroup) T.cableGroup.visible = x > 0.02 || ui.site === 'offshore' || m.kind !== 'hawt';
@@ -2335,7 +2914,7 @@
             rafId = requestAnimationFrame(loop);
             render(Math.min(clock.getDelta(), 0.05));
         }
-        function start() { if (running) return; running = true; clock.getDelta(); loop(); }
+        function start() { if (running) return; running = true; state.pitchClock = 0; clock.getDelta(); loop(); }
         function stop() { running = false; cancelAnimationFrame(rafId); }
         function updateRunState() { if (visible && !document.hidden) start(); else stop(); }
         if ('IntersectionObserver' in window) {
@@ -2348,6 +2927,7 @@
         //  Hooks for the UI layer
         // ===============================================================
         viewer = {
+            pitchDeg() { return running ? THREE.MathUtils.radToDeg(state.pitch) : undefined; },   // paused off-screen: use the setpoint
             hasPart(id) { return !!regFor(id); },
             renumber() { refreshLabelText(); },
             configure(rebuild) {

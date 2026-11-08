@@ -1,6 +1,6 @@
 // Service Worker for Renewable Energy Nexus
 // NOTE: network-first to avoid serving stale HTML/CSS during active development.
-const CACHE_NAME = 'renewable-energy-nexus-v10';
+const CACHE_NAME = 'renewable-energy-nexus-v11';
 const PRECACHE_URLS = [
     '/',
     '/index.html',
